@@ -20,6 +20,7 @@ class ProductsViewModel {
     
     // MARK: - Published Properties
     @Published var products: [Product] = []
+    @Published var cellViewModels: [ProductCellViewModel] = []
     @Published var isLoading = false
     @Published var hasMorePages = true
     @Published var errorMessage: String?
@@ -32,7 +33,7 @@ class ProductsViewModel {
     
     // MARK: - Computed Properties
     var numberOfProducts: Int {
-        return products.count
+        return cellViewModels.count
     }
     
     // MARK: - Initialization
@@ -42,13 +43,13 @@ class ProductsViewModel {
     }
     
     private func setupBindings() {
-        // Listen for product updates
-//        NotificationCenter.default.publisher(for: .productUpdated)
-//            .compactMap { $0.object as? Product }
-//            .sink { [weak self] updatedProduct in
-//                self?.updateProduct(updatedProduct)
-//            }
-//            .store(in: &cancellables)
+        // Create cell ViewModels when products change
+        $products
+            .sink { [weak self] products in
+                self?.createCellViewModels(from: products)
+            }
+            .store(in: &cancellables)
+        
     }
     
     // MARK: - Methods
@@ -76,8 +77,17 @@ class ProductsViewModel {
     }
     
 
+    func cellViewModel(at index: Int) -> ProductCellViewModel {
+        return cellViewModels[index]
+    }
+    
     func product(at index: Int) -> Product {
-        return products[index]
+        return cellViewModels[index].getProduct()
+    }
+    
+    // MARK: - Private Methods
+    private func createCellViewModels(from products: [Product]) {
+        cellViewModels = products.map { ProductCellViewModel(product: $0) }
     }
     
 //    func selectProduct(at index: Int) {

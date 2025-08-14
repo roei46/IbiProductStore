@@ -71,9 +71,9 @@ class MainTabCoordinator: Coordinator {
         
         // Products Tab
         let productsNav = UINavigationController()
-//        let productsCoordinator = ProductsCoordinator(navigationController: productsNav)
-//        childCoordinators.append(productsCoordinator)
-//        productsCoordinator.start()
+        let productsCoordinator = ProductsCoordinator(navigationController: productsNav)
+        childCoordinators.append(productsCoordinator)
+        productsCoordinator.start()
         productsNav.tabBarItem = UITabBarItem(
             title: "Products",
             image: UIImage(systemName: "list.bullet"),
@@ -152,6 +152,65 @@ final class LoginCoordinator: Coordinator {
         
         navigationController.setViewControllers([loginViewController], animated: false)
     }
+    
+    private func showError(_ message: String) {
+        let alert = UIAlertController(title: "Error", message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        navigationController.present(alert, animated: true)
+    }
+}
+
+
+class ProductsCoordinator: Coordinator {
+    var childCoordinators = [Coordinator]()
+    var navigationController: UINavigationController
+    private var cancellables = Set<AnyCancellable>()
+    
+    init(navigationController: UINavigationController) {
+        self.navigationController = navigationController
+    }
+    
+    func start() {
+        let productsViewModel = ProductsViewModel()
+        let productsViewController = TableViewWithTitleViewController(viewModel: productsViewModel)
+
+        
+        // Subscribe to product selection
+        productsViewModel.productSelectedPublisher
+            .sink { [weak self] product in
+               // self?.showProductDetail(product: product)
+            }
+            .store(in: &cancellables)
+        
+        // Subscribe to errors and handle them in coordinator
+        productsViewModel.$errorMessage
+            .compactMap { $0 }
+            .sink { [weak self] error in
+                self?.showError(error)
+            }
+            .store(in: &cancellables)
+        
+        navigationController.pushViewController(productsViewController, animated: false)
+    }
+    
+//    private func showProductDetail(product: Product) {
+//        let detailViewController = ProductDetailViewController()
+//        let detailViewModel = ProductDetailViewModel(product: product)
+//        detailViewController.viewModel = detailViewModel
+//        
+//        // Subscribe to product updates from detail screen
+//        detailViewModel.productUpdatedPublisher
+//            .sink { [weak self] updatedProduct in
+//                // Update the products list if needed
+//                NotificationCenter.default.post(
+//                    name: .productUpdated,
+//                    object: updatedProduct
+//                )
+//            }
+//            .store(in: &cancellables)
+//        
+//        navigationController.pushViewController(detailViewController, animated: true)
+//    }
     
     private func showError(_ message: String) {
         let alert = UIAlertController(title: "Error", message: message, preferredStyle: .alert)
