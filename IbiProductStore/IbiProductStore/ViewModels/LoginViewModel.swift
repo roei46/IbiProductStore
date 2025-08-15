@@ -40,7 +40,7 @@ class LoginViewModel {
     
     
     
-    init (with authService: AuthenticationService) {
+    init(with authService: AuthenticationService) {
         self.authService = authService
         
         loginBioTrigger

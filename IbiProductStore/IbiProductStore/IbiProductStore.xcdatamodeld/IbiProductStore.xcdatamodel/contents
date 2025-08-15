@@ -1,4 +1,56 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="1" systemVersion="11A491" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithCloudKit="false" userDefinedModelVersionIdentifier="">
-    <elements/>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="23231" systemVersion="24A348" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithCloudKit="false" userDefinedModelVersionIdentifier="">
+    <entity name="CDDimensions" representedClassName="CDDimensions" syncable="YES">
+        <attribute name="depth" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="height" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="width" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <relationship name="product" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="CDProduct" inverseName="dimensions" inverseEntity="CDProduct"/>
+    </entity>
+    <entity name="CDMeta" representedClassName="CDMeta" syncable="YES">
+        <attribute name="barcode" optional="YES" attributeType="String"/>
+        <attribute name="createdAt" optional="YES" attributeType="String"/>
+        <attribute name="qrCode" optional="YES" attributeType="String"/>
+        <attribute name="updatedAt" optional="YES" attributeType="String"/>
+        <relationship name="product" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="CDProduct" inverseName="meta" inverseEntity="CDProduct"/>
+    </entity>
+    <entity name="CDProduct" representedClassName="CDProduct" syncable="YES">
+        <attribute name="availabilityStatus" optional="YES" attributeType="String"/>
+        <attribute name="brand" optional="YES" attributeType="String"/>
+        <attribute name="category" optional="YES" attributeType="String"/>
+        <attribute name="descriptionText" optional="YES" attributeType="String"/>
+        <attribute name="discountPercentage" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="encryptedIDCipher" optional="YES" attributeType="Binary"/>
+        <attribute name="encryptedIDNonce" optional="YES" attributeType="Binary"/>
+        <attribute name="encryptedSKUCipher" optional="YES" attributeType="Binary"/>
+        <attribute name="encryptedSKUNonce" optional="YES" attributeType="Binary"/>
+        <attribute name="id" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="images" optional="YES" attributeType="Transformable" valueTransformerName="NSSecureUnarchiveFromData" customClassName="[String]"/>
+        <attribute name="isFavorite" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
+        <attribute name="isLocallyAdded" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
+        <attribute name="isLocallyDeleted" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
+        <attribute name="isLocallyModified" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
+        <attribute name="minimumOrderQuantity" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="price" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="rating" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="returnPolicy" optional="YES" attributeType="String"/>
+        <attribute name="shippingInformation" optional="YES" attributeType="String"/>
+        <attribute name="sku" optional="YES" attributeType="String"/>
+        <attribute name="stock" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="tags" optional="YES" attributeType="Transformable" valueTransformerName="NSSecureUnarchiveFromData" customClassName="[String]"/>
+        <attribute name="thumbnail" optional="YES" attributeType="String"/>
+        <attribute name="title" optional="YES" attributeType="String"/>
+        <attribute name="warrantyInformation" optional="YES" attributeType="String"/>
+        <attribute name="weight" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
+        <relationship name="dimensions" optional="YES" maxCount="1" deletionRule="Cascade" destinationEntity="CDDimensions" inverseName="product" inverseEntity="CDDimensions"/>
+        <relationship name="meta" optional="YES" maxCount="1" deletionRule="Cascade" destinationEntity="CDMeta" inverseName="product" inverseEntity="CDMeta"/>
+        <relationship name="reviews" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="CDReview" inverseName="product" inverseEntity="CDReview"/>
+    </entity>
+    <entity name="CDReview" representedClassName="CDReview" syncable="YES">
+        <attribute name="comment" optional="YES" attributeType="String"/>
+        <attribute name="date" optional="YES" attributeType="String"/>
+        <attribute name="rating" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="reviewerEmail" optional="YES" attributeType="String"/>
+        <attribute name="reviewerName" optional="YES" attributeType="String"/>
+        <relationship name="product" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="CDProduct" inverseName="reviews" inverseEntity="CDProduct"/>
+    </entity>
 </model>

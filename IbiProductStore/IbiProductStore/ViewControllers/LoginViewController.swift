@@ -54,16 +54,18 @@ class LoginViewController: UIViewController {
         loginButton.tapPublisher
             .subscribe(viewModel.loginTrigger)
             .store(in: &cancellables)
+        loginButton
+            .bindLoading(to: viewModel.$isLoading, animationName: "spinner", cancellables: &cancellables)
         
         biometricButton.tapPublisher
             .subscribe(viewModel.loginBioTrigger)
             .store(in: &cancellables)
         
-        // Bind loading state
+        // Debug: Check if loading state changes
         viewModel.$isLoading
             .receive(on: DispatchQueue.main)
             .sink { [weak self] isLoading in
-                // self?.updateLoadingState(isLoading)
+                print("🔄 Loading state changed: \(isLoading)")
             }
             .store(in: &cancellables)
         

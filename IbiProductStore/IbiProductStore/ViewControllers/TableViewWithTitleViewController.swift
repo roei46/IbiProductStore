@@ -15,7 +15,7 @@ class TableViewWithTitleViewController: UIViewController {
     @IBOutlet weak var tableView: UITableView!
     
     // MARK: - Properties
-    private var viewModel: ProductsViewModel
+    private var viewModel: any ProductListProtocol
     private var cancellables = Set<AnyCancellable>()
     private lazy var refreshControl: UIRefreshControl = {
         let control = UIRefreshControl()
@@ -24,7 +24,7 @@ class TableViewWithTitleViewController: UIViewController {
     }()
     
     // MARK: - Initialization
-    init(viewModel: ProductsViewModel) {
+    init<T: ProductListProtocol>(viewModel: T) {
         self.viewModel = viewModel
         super.init(nibName: "TableViewWithTitleViewController", bundle: nil)
     }
@@ -36,9 +36,29 @@ class TableViewWithTitleViewController: UIViewController {
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
+        setupUI()
         setupTableView()
         setupBindings()
         loadInitialData()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        viewModel.refreshOnAppear()
+    }
+    
+    // MARK: - Setup Methods
+    private func setupUI() {
+        titleLabel.text = viewModel.screenTitle
+        
+        if viewModel.canEdit() {
+            navigationItem.leftBarButtonItem = UIBarButtonItem(
+                title: "Reset",
+                style: .plain,
+                target: self,
+                action: #selector(resetTapped)
+            )
+        }
     }
     
     // MARK: - Setup Methods
@@ -57,7 +77,7 @@ class TableViewWithTitleViewController: UIViewController {
     
     private func setupBindings() {
         // Observe cell view models changes
-        viewModel.$cellViewModels
+        viewModel.cellViewModelsPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
                 self?.tableView.reloadData()
@@ -65,7 +85,7 @@ class TableViewWithTitleViewController: UIViewController {
             .store(in: &cancellables)
         
         // Observe loading state
-        viewModel.$isLoading
+        viewModel.isLoadingPublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] isLoading in
                 if !isLoading {
@@ -75,7 +95,7 @@ class TableViewWithTitleViewController: UIViewController {
             .store(in: &cancellables)
         
         // Observe error messages
-        viewModel.$errorMessage
+        viewModel.errorMessagePublisher
             .compactMap { $0 }
             .receive(on: DispatchQueue.main)
             .sink { [weak self] errorMessage in
@@ -90,7 +110,22 @@ class TableViewWithTitleViewController: UIViewController {
     
     // MARK: - Actions
     @objc private func refreshProducts() {
-        viewModel.loadProducts()
+        viewModel.refreshData()
+    }
+    
+    @objc private func resetTapped() {
+        let alert = UIAlertController(
+            title: "Reset Products",
+            message: "This will reset all changes and reload from server. Are you sure?",
+            preferredStyle: .alert
+        )
+        
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        alert.addAction(UIAlertAction(title: "Reset", style: .destructive) { [weak self] _ in
+            self?.viewModel.resetToServer()
+        })
+        
+        present(alert, animated: true)
     }
     
     // MARK: - Helper Methods
@@ -129,8 +164,79 @@ extension TableViewWithTitleViewController: UITableViewDelegate {
         navigateToProductDetail(product: product)
     }
     
+    func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+        var actions: [UIContextualAction] = []
+        
+        // Favorite action
+        let product = viewModel.product(at: indexPath.row)
+        let isFavorite = viewModel.isFavorite(product)
+        
+        let favoriteAction = UIContextualAction(
+            style: .normal,
+            title: isFavorite ? "Unfavorite" : "Favorite"
+        ) { [weak self] _, _, completion in
+            self?.viewModel.toggleFavorite(at: indexPath.row)
+            completion(true)
+        }
+        favoriteAction.backgroundColor = isFavorite ? .systemOrange : .systemBlue
+        favoriteAction.image = UIImage(systemName: isFavorite ? "heart.slash" : "heart")
+        actions.append(favoriteAction)
+        
+        // Delete action (only for editable lists)
+        if viewModel.canEdit() {
+            let deleteAction = UIContextualAction(style: .destructive, title: "Delete") { [weak self] _, _, completion in
+                self?.confirmDelete(at: indexPath, completion: completion)
+            }
+            deleteAction.image = UIImage(systemName: "trash")
+            actions.append(deleteAction)
+        }
+        
+        return UISwipeActionsConfiguration(actions: actions)
+    }
+    
+    func tableView(_ tableView: UITableView, leadingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+        guard viewModel.canEdit() else { return nil }
+        
+        let editAction = UIContextualAction(style: .normal, title: "Edit") { [weak self] _, _, completion in
+            self?.editProduct(at: indexPath)
+            completion(true)
+        }
+        editAction.backgroundColor = .systemGreen
+        editAction.image = UIImage(systemName: "pencil")
+        
+        return UISwipeActionsConfiguration(actions: [editAction])
+    }
+    
+    // MARK: - Helper Methods
     private func navigateToProductDetail(product: Product) {
-//        let detailViewController = ProductDetailViewController(product: product)
-//        navigationController?.pushViewController(detailViewController, animated: true)
+        // TODO: Implement product detail navigation
+        print("Navigate to product detail: \(product.title)")
+    }
+    
+    private func confirmDelete(at indexPath: IndexPath, completion: @escaping (Bool) -> Void) {
+        let product = viewModel.product(at: indexPath.row)
+        
+        let alert = UIAlertController(
+            title: "Delete Product",
+            message: "Are you sure you want to delete \(product.title)?",
+            preferredStyle: .alert
+        )
+        
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel) { _ in
+            completion(false)
+        })
+        
+        alert.addAction(UIAlertAction(title: "Delete", style: .destructive) { [weak self] _ in
+            self?.viewModel.deleteProduct(at: indexPath.row)
+            completion(true)
+        })
+        
+        present(alert, animated: true)
+    }
+    
+    private func editProduct(at indexPath: IndexPath) {
+        // TODO: Implement product editing in edit screen!!! very importent!!!!!!!!!!!!!!!!!
+        let product = viewModel.product(at: indexPath.row)
+        print("Edit product: \(product.title)")
     }
 }

@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		D24794032E4EB01E00E26D41 /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = D24794022E4EB01E00E26D41 /* Lottie */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		D247938A2E4E526500E26D41 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -65,6 +69,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D24794032E4EB01E00E26D41 /* Lottie in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -125,6 +130,7 @@
 			);
 			name = IbiProductStore;
 			packageProductDependencies = (
+				D24794022E4EB01E00E26D41 /* Lottie */,
 			);
 			productName = IbiProductStore;
 			productReference = D24793702E4E526300E26D41 /* IbiProductStore.app */;
@@ -208,6 +214,9 @@
 			);
 			mainGroup = D24793672E4E526300E26D41;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				D24794012E4EB01E00E26D41 /* XCRemoteSwiftPackageReference "lottie-spm" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = D24793712E4E526300E26D41 /* Products */;
 			projectDirPath = "";
@@ -292,11 +301,11 @@
 				DEVELOPMENT_TEAM = PY33DFS879;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = IbiProductStore/Info.plist;
+				INFOPLIST_KEY_NSFaceIDUsageDescription = "This app uses Face ID to securely authenticate and access your account.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -320,11 +329,11 @@
 				DEVELOPMENT_TEAM = PY33DFS879;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = IbiProductStore/Info.plist;
+				INFOPLIST_KEY_NSFaceIDUsageDescription = "This app uses Face ID to securely authenticate and access your account.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -571,6 +580,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		D24794012E4EB01E00E26D41 /* XCRemoteSwiftPackageReference "lottie-spm" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/airbnb/lottie-spm.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 4.5.2;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		D24794022E4EB01E00E26D41 /* Lottie */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D24794012E4EB01E00E26D41 /* XCRemoteSwiftPackageReference "lottie-spm" */;
+			productName = Lottie;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = D24793682E4E526300E26D41 /* Project object */;
 }

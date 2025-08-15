@@ -21,7 +21,5 @@
 			</array>
 		</dict>
 	</dict>
-	<key>NSFaceIDUsageDescription</key>
-	<string>This app uses Face ID to securely authenticate and access your account.</string>
 </dict>
 </plist>

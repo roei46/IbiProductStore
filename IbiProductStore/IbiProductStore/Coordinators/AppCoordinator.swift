@@ -82,9 +82,9 @@ class MainTabCoordinator: Coordinator {
 //        
 //        // Favorites Tab
         let favoritesNav = UINavigationController()
-//        let favoritesCoordinator = FavoritesCoordinator(navigationController: favoritesNav)
-//        childCoordinators.append(favoritesCoordinator)
-//        favoritesCoordinator.start()
+        let favoritesCoordinator = FavoritesCoordinator(navigationController: favoritesNav)
+        childCoordinators.append(favoritesCoordinator)
+        favoritesCoordinator.start()
         favoritesNav.tabBarItem = UITabBarItem(
             title: "Favorites",
             image: UIImage(systemName: "heart"),
@@ -216,5 +216,38 @@ class ProductsCoordinator: Coordinator {
         let alert = UIAlertController(title: "Error", message: message, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "OK", style: .default))
         navigationController.present(alert, animated: true)
+    }
+}
+
+class FavoritesCoordinator: Coordinator {
+    var childCoordinators = [Coordinator]()
+    var navigationController: UINavigationController
+    private var cancellables = Set<AnyCancellable>()
+    
+    init(navigationController: UINavigationController) {
+        self.navigationController = navigationController
+    }
+    
+    func start() {
+        let favoritesViewModel = FavoritesViewModel()
+        let favoritesViewController = TableViewWithTitleViewController(viewModel: favoritesViewModel)
+
+        
+        // Subscribe to product selection
+//        favoritesViewModel.productSelectedPublisher
+//            .sink { [weak self] product in
+//                self?.showProductDetail(product: product)
+//            }
+//            .store(in: &cancellables)
+        
+        navigationController.pushViewController(favoritesViewController, animated: false)
+    }
+    
+    private func showProductDetail(product: Product) {
+//        let detailViewController = ProductDetailViewController()
+//        let detailViewModel = ProductDetailViewModel(product: product)
+//        detailViewController.viewModel = detailViewModel
+//        
+//        navigationController.pushViewController(detailViewController, animated: true)
     }
 }

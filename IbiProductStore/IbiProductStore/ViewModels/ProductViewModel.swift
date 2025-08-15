@@ -8,15 +8,15 @@
 import Foundation
 import Combine
 
-class ProductsViewModel {
+class ProductsViewModel: ProductListProtocol {
     
     // MARK: - Properties
     private let networkService: ProductService
-//    private let storageService = ProductsStorageService.shared
+    private let localStorageService: LocalStorageServiceProtocol
     private var cancellables = Set<AnyCancellable>()
+    private var originalProducts: [Product] = [] 
     
-//    private var currentPage = 0
-//    private let itemsPerPage = 20
+
     
     // MARK: - Published Properties
     @Published var products: [Product] = []
@@ -31,14 +31,20 @@ class ProductsViewModel {
         productSelectedSubject.eraseToAnyPublisher()
     }
     
+    // MARK: - Publishers (Protocol Requirement)
+    var cellViewModelsPublisher: Published<[ProductCellViewModel]>.Publisher { $cellViewModels }
+    var isLoadingPublisher: Published<Bool>.Publisher { $isLoading }
+    var errorMessagePublisher: Published<String?>.Publisher { $errorMessage }
+    
     // MARK: - Computed Properties
-    var numberOfProducts: Int {
-        return cellViewModels.count
+    var screenTitle: String {
+        return "Products"
     }
     
     // MARK: - Initialization
-    init(productService: ProductService = .init()) {
+    init(productService: ProductService = .init(), localStorageService: LocalStorageServiceProtocol = CoreDataStorageService.shared) {
         self.networkService = productService
+        self.localStorageService = localStorageService
         setupBindings()
     }
     
@@ -61,10 +67,12 @@ class ProductsViewModel {
         
         Task {
             do {
+                // TODO: - CHECK ASYNC LET??
                 let response: ProductResponse = try await networkService.getProduct()
                 
                 await MainActor.run {
-                    self.products = response.products
+                    self.originalProducts = response.products
+                    self.applyLocalChanges(to: response.products)
                     self.isLoading = false
                 }
             } catch {
@@ -85,59 +93,100 @@ class ProductsViewModel {
         return cellViewModels[index].getProduct()
     }
     
+    // MARK: - ProductListProtocol Implementation
+    func toggleFavorite(at index: Int) {
+        // TODO: - Maybe add so Product is favorite?
+        let product = product(at: index)
+        localStorageService.toggleFavorite(product)
+    }
+    
+    func isFavorite(_ product: Product) -> Bool {
+        return localStorageService.isFavorite(product)
+    }
+    
+    // MARK: - CRUD Operations
+    func canEdit() -> Bool { return true }
+    func canAdd() -> Bool { return true }
+    
+    func editProduct(at index: Int, with updatedProduct: Product) {
+        // Update in current list
+        products[index] = updatedProduct
+        
+        // Save to local storage
+        var modifiedProducts = localStorageService.loadModifiedProducts()
+        if let existingIndex = modifiedProducts.firstIndex(where: { $0.id == updatedProduct.id }) {
+            modifiedProducts[existingIndex] = updatedProduct
+        } else {
+            modifiedProducts.append(updatedProduct)
+        }
+        localStorageService.saveModifiedProducts(modifiedProducts)
+    }
+    
+    func addProduct(_ product: Product) {
+        // Add to current list
+        products.insert(product, at: 0)
+        
+        // Save to local storage
+        var addedProducts = localStorageService.loadAddedProducts()
+        addedProducts.append(product)
+        localStorageService.saveAddedProducts(addedProducts)
+    }
+    
+    func deleteProduct(at index: Int) {
+        let product = products[index]
+        
+        // Remove from current list
+        products.remove(at: index)
+        
+        // Add to deleted IDs
+        var deletedIds = localStorageService.loadDeletedProductIds()
+        deletedIds.append(product.id)
+        localStorageService.saveDeletedProductIds(deletedIds)
+        
+        // Remove from favorites if it was favorited
+        if localStorageService.isFavorite(product) {
+            localStorageService.removeFromFavorites(product)
+        }
+    }
+    
+    func resetToServer() {
+        // Clear all local changes
+        localStorageService.clearAllLocalData()
+        
+        // Reset to original products
+        products = originalProducts
+    }
+    
+    // Override to prevent unnecessary reloads on products screen
+    func refreshOnAppear() {
+        // Products screen doesn't need to reload on appear since it loads from server once
+        // Only reload if there are no products
+        if products.isEmpty {
+            loadProducts()
+        }
+    }
+    
     // MARK: - Private Methods
     private func createCellViewModels(from products: [Product]) {
         cellViewModels = products.map { ProductCellViewModel(product: $0) }
     }
     
-//    func selectProduct(at index: Int) {
-//        let product = products[index]
-//        productSelectedSubject.send(product)
-//    }
-//    
-//    func addNewProduct(_ product: Product) {
-//        storageService.addProduct(product)
-//        products.insert(product, at: 0)
-//    }
-//    
-//    func updateProduct(_ product: Product) {
-//        storageService.saveModifiedProduct(product)
-//        
-//        if let index = products.firstIndex(where: { $0.id == product.id }) {
-//            products[index] = product
-//        }
-//    }
-//    
-//    func deleteProduct(at index: Int) {
-//        let product = products[index]
-//        storageService.deleteProduct(product.id)
-//        products.remove(at: index)
-//    }
-//    
-//    func resetLocalChanges() {
-//        storageService.resetLocalChanges()
-//        loadProducts(reset: true)
-//    }
-//    
-//    private func handleProductsResponse(_ response: ProductResponse, reset: Bool) {
-//        let modifiedProducts = storageService.getModifiedProducts()
-//        let deletedIds = storageService.getDeletedProductIds()
-//        let addedProducts = storageService.getAddedProducts()
-//        
-//        // Filter out deleted products and apply modifications
-//        var processedProducts = response.products
-//            .filter { !deletedIds.contains($0.id) }
-//            .map { modifiedProducts[$0.id] ?? $0 }
-//        
-//        if reset {
-//            // Add custom products at the beginning
-//            processedProducts = addedProducts + processedProducts
-//            products = processedProducts
-//        } else {
-//            products.append(contentsOf: processedProducts)
-//        }
-//        
-//        hasMorePages = response.products.count == itemsPerPage
-//        isLoading = false
-//    }
+    private func applyLocalChanges(to serverProducts: [Product]) {
+        let modifiedProducts = localStorageService.loadModifiedProducts()
+        let addedProducts = localStorageService.loadAddedProducts()
+        let deletedIds = localStorageService.loadDeletedProductIds()
+        
+        // Create dictionary for quick lookup of modified products
+        let modifiedDict = Dictionary(uniqueKeysWithValues: modifiedProducts.map { ($0.id, $0) })
+        
+        // Filter out deleted products and apply modifications
+        var processedProducts = serverProducts
+            .filter { !deletedIds.contains($0.id) }
+            .map { modifiedDict[$0.id] ?? $0 }
+        
+        // Add custom products at the beginning
+        processedProducts = addedProducts + processedProducts
+        
+        self.products = processedProducts
+    }
 }
