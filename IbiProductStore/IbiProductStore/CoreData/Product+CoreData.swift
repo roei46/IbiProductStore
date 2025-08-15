@@ -177,7 +177,13 @@ extension CDProduct {
         request.resultType = .dictionaryResultType
         
         let results = try context.fetch(request)
-        return results.compactMap { ($0 as? [String: Any])?["id"] as? Int32 }.map { Int($0) }
+        return results.compactMap { dict in
+            if let dict = dict as? [String: Any],
+               let id = dict["id"] as? Int32 {
+                return Int(id)
+            }
+            return nil
+        }
     }
     
     /// Find product by ID

@@ -31,6 +31,11 @@ class ProductsViewModel: ProductListProtocol {
         productSelectedSubject.eraseToAnyPublisher()
     }
     
+    private let addProductSubject = PassthroughSubject<Void, Never>()
+    var addProductPublisher: AnyPublisher<Void, Never> {
+        addProductSubject.eraseToAnyPublisher()
+    }
+    
     // MARK: - Triggers
     let resetTrigger = PassthroughSubject<Void, Never>()
     var resetTriggerPublisher: AnyPublisher<Void, Never> {
@@ -90,6 +95,9 @@ class ProductsViewModel: ProductListProtocol {
         }
     }
     
+    func addProduct() {
+        addProductSubject.send()
+    }
 
     func cellViewModel(at index: Int) -> ProductCellViewModel {
         return cellViewModels[index]

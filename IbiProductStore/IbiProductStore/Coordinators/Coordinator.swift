@@ -33,8 +33,8 @@ extension Coordinator {
         navigationController.present(alert, animated: true)
     }
     
-    func showProductDetail(product: Product, cancellables: inout Set<AnyCancellable>) {
-        let detailViewModel = ProductDetailViewModel(product: product)
+    func showProductDetail(mode: DetailMode, cancellables: inout Set<AnyCancellable>) {
+        let detailViewModel = ProductDetailViewModel(mode: mode)
         let detailViewController = DetailsViewController(viewModel: detailViewModel)
 
         detailViewModel.closeTrigger

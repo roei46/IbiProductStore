@@ -14,6 +14,7 @@ class ProductDetailViewModel: DetailsProtocol, ObservableObject {
     private var product: Product
     private let localStorageService: LocalStorageServiceProtocol
     private var cancellables = Set<AnyCancellable>()
+    private let mode: DetailMode
     
     // MARK: - Published Properties
     @Published private(set) var isFavorite: Bool = false
@@ -56,15 +57,48 @@ class ProductDetailViewModel: DetailsProtocol, ObservableObject {
     let closeTrigger = PassthroughSubject<Void, Never>()
     
     // MARK: - Initialization
-    init(product: Product, localStorageService: LocalStorageServiceProtocol = CoreDataStorageService.shared) {
-        self.product = product
+    init(mode: DetailMode, localStorageService: LocalStorageServiceProtocol = CoreDataStorageService.shared) {
+        self.mode = mode
         self.localStorageService = localStorageService
-        self.isFavorite = product.isFavorite
         
-        // Initialize editable fields
-        self.editableTitle = product.title
-        self.editableDescription = product.description
-        self.editablePrice = product.formattedPrice
+        switch mode {
+        case .edit(let product):
+            self.product = product
+            self.isFavorite = product.isFavorite
+            self.editableTitle = product.title
+            self.editableDescription = product.description
+            self.editablePrice = product.formattedPrice
+        case .add:
+            self.product = Product(
+                id: Int.random(in: 10000...99999),
+                title: "",
+                description: "",
+                category: "",
+                price: 0,
+                discountPercentage: 0,
+                rating: 0,
+                stock: 0,
+                tags: [],
+                brand: "",
+                sku: "",
+                weight: 0,
+                dimensions: Dimensions(width: 0, height: 0, depth: 0),
+                warrantyInformation: "",
+                shippingInformation: "",
+                availabilityStatus: "In Stock",
+                reviews: [],
+                returnPolicy: "",
+                minimumOrderQuantity: 1,
+                meta: Meta(createdAt: "", updatedAt: "", barcode: "", qrCode: ""),
+                images: [],
+                thumbnail: ""
+            )
+            self.isFavorite = false
+            self.editableTitle = ""
+            self.editableDescription = ""
+            self.editablePrice = "0.00"
+            self.isEditing = true // Start in edit mode for add
+        }
     }
     
     // MARK: - DetailsProtocol Methods
@@ -89,40 +123,81 @@ class ProductDetailViewModel: DetailsProtocol, ObservableObject {
             return
         }
         
-        // Create new product with updated values
-        let updatedProduct = Product(
-            id: product.id,
-            title: editableTitle,
-            description: editableDescription,
-            category: product.category,
-            price: priceValue,
-            discountPercentage: product.discountPercentage,
-            rating: product.rating,
-            stock: product.stock,
-            tags: product.tags,
-            brand: product.brand,
-            sku: product.sku,
-            weight: product.weight,
-            dimensions: product.dimensions,
-            warrantyInformation: product.warrantyInformation,
-            shippingInformation: product.shippingInformation,
-            availabilityStatus: product.availabilityStatus,
-            reviews: product.reviews,
-            returnPolicy: product.returnPolicy,
-            minimumOrderQuantity: product.minimumOrderQuantity,
-            meta: product.meta,
-            images: product.images,
-            thumbnail: product.thumbnail
-        )
-        
-        // Update local product
-        self.product = updatedProduct
-        
-        // Save to local storage as modified
-        localStorageService.saveModifiedProducts([updatedProduct])
-        
-        // Exit edit mode
-        isEditing = false
+        switch mode {
+        case .edit(let originalProduct):
+            // Edit mode - update existing product
+            let updatedProduct = Product(
+                id: originalProduct.id,
+                title: editableTitle,
+                description: editableDescription,
+                category: originalProduct.category,
+                price: priceValue,
+                discountPercentage: originalProduct.discountPercentage,
+                rating: originalProduct.rating,
+                stock: originalProduct.stock,
+                tags: originalProduct.tags,
+                brand: originalProduct.brand,
+                sku: originalProduct.sku,
+                weight: originalProduct.weight,
+                dimensions: originalProduct.dimensions,
+                warrantyInformation: originalProduct.warrantyInformation,
+                shippingInformation: originalProduct.shippingInformation,
+                availabilityStatus: originalProduct.availabilityStatus,
+                reviews: originalProduct.reviews,
+                returnPolicy: originalProduct.returnPolicy,
+                minimumOrderQuantity: originalProduct.minimumOrderQuantity,
+                meta: originalProduct.meta,
+                images: originalProduct.images,
+                thumbnail: originalProduct.thumbnail
+            )
+            
+            // Update local product
+            self.product = updatedProduct
+            
+            // Save to local storage as modified
+            localStorageService.saveModifiedProducts([updatedProduct])
+            
+            // Exit edit mode
+            isEditing = false
+            
+        case .add:
+            // Add mode - create new product from user input
+            let newProduct = Product(
+                id: Int.random(in: 10000...99999),
+                title: editableTitle.isEmpty ? "New Product" : editableTitle,
+                description: editableDescription.isEmpty ? "No description" : editableDescription,
+                category: "General",
+                price: priceValue,
+                discountPercentage: 0,
+                rating: 66,
+                stock: 1,
+                tags: [],
+                brand: "",
+                sku: "",
+                weight: 0,
+                dimensions: Dimensions(width: 0, height: 0, depth: 0),
+                warrantyInformation: "",
+                shippingInformation: "",
+                availabilityStatus: "In Stock",
+                reviews: [],
+                returnPolicy: "",
+                minimumOrderQuantity: 1,
+                meta: Meta(createdAt: "", updatedAt: "", barcode: "", qrCode: ""),
+                images: [],
+                thumbnail: ""
+            )
+            
+            // Update local product
+            self.product = newProduct
+            
+            // Save new product to local storage
+            var addedProducts = localStorageService.loadAddedProducts()
+            addedProducts.append(newProduct)
+            localStorageService.saveAddedProducts(addedProducts)
+            
+            // Close the detail view after adding
+            closeTrigger.send()
+        }
     }
     
     func cancelEditing() {

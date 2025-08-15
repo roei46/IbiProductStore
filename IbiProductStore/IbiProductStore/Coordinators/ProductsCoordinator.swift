@@ -22,11 +22,19 @@ class ProductsCoordinator: Coordinator {
         let productsViewModel = ProductsViewModel()
         let productsViewController = TableViewWithTitleViewController(viewModel: productsViewModel)
                 
-        // Subscribe to product selection
+        // Subscribe to product selection (edit mode)
         productsViewModel.productSelectedPublisher
             .sink { [weak self] product in
                 guard let self = self else { return }
-                self.showProductDetail(product: product, cancellables: &self.cancellables)
+                self.showProductDetail(mode: .edit(product), cancellables: &self.cancellables)
+            }
+            .store(in: &cancellables)
+        
+        // Subscribe to add product (add mode)
+        productsViewModel.addProductPublisher
+            .sink { [weak self] in
+                guard let self = self else { return }
+                self.showProductDetail(mode: .add, cancellables: &self.cancellables)
             }
             .store(in: &cancellables)
         

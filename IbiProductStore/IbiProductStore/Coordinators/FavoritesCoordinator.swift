@@ -26,7 +26,7 @@ class FavoritesCoordinator: Coordinator {
         favoritesViewModel.productSelectedPublisher
             .sink { [weak self] product in
                 guard let self = self else { return }
-                self.showProductDetail(product: product, cancellables: &self.cancellables)
+                self.showProductDetail(mode: .edit(product), cancellables: &self.cancellables)
             }
             .store(in: &cancellables)
         

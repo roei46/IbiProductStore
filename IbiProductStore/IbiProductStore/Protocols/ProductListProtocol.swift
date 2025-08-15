@@ -34,7 +34,7 @@ protocol ProductListProtocol: ObservableObject {
     func refreshData()
     func refreshOnAppear()
     func navigateToDetail(at index: Int) 
-
+    func addProduct()
     
     // MARK: - Favorites Management
     func toggleFavorite(at index: Int)
@@ -70,5 +70,6 @@ extension ProductListProtocol {
     // Default CRUD implementations (can be overridden)
     func canEdit() -> Bool { return false }
     func deleteProduct(at index: Int) { }
+    func addProduct() { }
 }
 // TODO: - DO FROM SCRATCH IN SWIFTUI

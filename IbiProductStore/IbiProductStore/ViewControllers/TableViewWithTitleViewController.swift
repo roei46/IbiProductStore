@@ -59,6 +59,17 @@ class TableViewWithTitleViewController: UIViewController {
                 .store(in: &cancellables)
             
             navigationItem.leftBarButtonItem = UIBarButtonItem(customView: resetButton)
+            
+            let addButton = UIButton(type: .system)
+            addButton.setTitle("+", for: .normal)
+            addButton.titleLabel?.font = UIFont.systemFont(ofSize: 24, weight: .medium)
+            addButton.tapPublisher
+                .sink { [weak self] in
+                    self?.viewModel.addProduct()
+                }
+                .store(in: &cancellables)
+            
+            navigationItem.rightBarButtonItem = UIBarButtonItem(customView: addButton)
         }
     }
     
@@ -93,6 +104,8 @@ class TableViewWithTitleViewController: UIViewController {
                 }
             }
             .store(in: &cancellables)
+        
+        
         
     }
     
