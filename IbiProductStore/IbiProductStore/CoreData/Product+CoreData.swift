@@ -25,7 +25,7 @@ extension Product {
         cdProduct.discountPercentage = self.discountPercentage
         cdProduct.rating = self.rating
         cdProduct.stock = Int32(self.stock)
-        cdProduct.tags = self.tags
+        cdProduct.tags = self.tags as NSArray
         cdProduct.brand = self.brand
         cdProduct.sku = self.sku
         cdProduct.weight = Int32(self.weight)
@@ -39,7 +39,7 @@ extension Product {
         cdProduct.availabilityStatus = self.availabilityStatus
         cdProduct.returnPolicy = self.returnPolicy
         cdProduct.minimumOrderQuantity = Int32(self.minimumOrderQuantity)
-        cdProduct.images = self.images
+        cdProduct.images = self.images as NSArray
         cdProduct.thumbnail = self.thumbnail
         
         // Dimensions
@@ -117,7 +117,7 @@ extension CDProduct {
             discountPercentage: self.discountPercentage,
             rating: self.rating,
             stock: Int(self.stock),
-            tags: self.tags ?? [],
+            tags: (self.tags as? [String]) ?? [],
             brand: self.brand,
             sku: self.sku ?? "",
             weight: Int(self.weight),
@@ -129,7 +129,7 @@ extension CDProduct {
             returnPolicy: self.returnPolicy ?? "",
             minimumOrderQuantity: Int(self.minimumOrderQuantity),
             meta: meta,
-            images: self.images ?? [],
+            images: (self.images as? [String]) ?? [],
             thumbnail: self.thumbnail ?? ""
         )
         product.isFavorite = self.isFavorite

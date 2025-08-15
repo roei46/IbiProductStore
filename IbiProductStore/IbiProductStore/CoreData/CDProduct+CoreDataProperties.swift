@@ -24,7 +24,7 @@ extension CDProduct {
     @NSManaged public var encryptedSKUCipher: Data?
     @NSManaged public var encryptedSKUNonce: Data?
     @NSManaged public var id: Int32
-    @NSManaged public var images: [String]?
+    @NSManaged public var images: NSArray?
     @NSManaged public var isFavorite: Bool
     @NSManaged public var isLocallyAdded: Bool
     @NSManaged public var isLocallyDeleted: Bool
@@ -36,7 +36,7 @@ extension CDProduct {
     @NSManaged public var shippingInformation: String?
     @NSManaged public var sku: String?
     @NSManaged public var stock: Int32
-    @NSManaged public var tags: [String]?
+    @NSManaged public var tags: NSArray?
     @NSManaged public var thumbnail: String?
     @NSManaged public var title: String?
     @NSManaged public var warrantyInformation: String?

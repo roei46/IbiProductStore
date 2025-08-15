@@ -252,7 +252,7 @@ final class CoreDataStorageService: LocalStorageServiceProtocol {
         cdProduct.discountPercentage = product.discountPercentage
         cdProduct.rating = product.rating
         cdProduct.stock = Int32(product.stock)
-        cdProduct.tags = product.tags
+        cdProduct.tags = product.tags as NSArray
         cdProduct.brand = product.brand
         cdProduct.sku = product.sku
         cdProduct.weight = Int32(product.weight)
@@ -261,7 +261,7 @@ final class CoreDataStorageService: LocalStorageServiceProtocol {
         cdProduct.availabilityStatus = product.availabilityStatus
         cdProduct.returnPolicy = product.returnPolicy
         cdProduct.minimumOrderQuantity = Int32(product.minimumOrderQuantity)
-        cdProduct.images = product.images
+        cdProduct.images = product.images as NSArray
         cdProduct.thumbnail = product.thumbnail
         
         // Update dimensions
@@ -299,19 +299,37 @@ final class CoreDataStorageService: LocalStorageServiceProtocol {
     
     // MARK: - Encryption Helper Methods
     private func encryptSensitiveFields(_ cdProduct: CDProduct, from product: Product) {
+        // Skip if already encrypted
+        if cdProduct.encryptedIDCipher != nil && cdProduct.encryptedSKUCipher != nil {
+            return
+        }
+        
         do {
             // Encrypt product ID
-            let (idCipher, idNonce) = try EncryptionHelper.encrypt(String(product.id), using: encryptionKey)
+            let productIdString = String(product.id)
+            guard !productIdString.isEmpty else {
+                print("⚠️ Product ID is empty, skipping encryption")
+                return
+            }
+            
+            let (idCipher, idNonce) = try EncryptionHelper.encrypt(productIdString, using: encryptionKey)
             cdProduct.encryptedIDCipher = idCipher
             cdProduct.encryptedIDNonce = idNonce
             
             // Encrypt SKU
-            let (skuCipher, skuNonce) = try EncryptionHelper.encrypt(product.sku, using: encryptionKey)
+            let skuValue = product.sku
+            guard !skuValue.isEmpty else {
+                print("⚠️ SKU value is empty, skipping encryption")
+                return
+            }
+            
+            let (skuCipher, skuNonce) = try EncryptionHelper.encrypt(skuValue, using: encryptionKey)
             cdProduct.encryptedSKUCipher = skuCipher
             cdProduct.encryptedSKUNonce = skuNonce
+            
         } catch {
-            print("Encryption failed: \(error)")
-            // Keep plain values as fallback (already set in toCoreData)
+            print("❌ Encryption failed: \(error)")
+            // Don't rethrow - allow the save to continue without encryption
         }
     }
     
@@ -356,6 +374,13 @@ final class CoreDataStorageService: LocalStorageServiceProtocol {
                 product = newProduct
             } catch {
                 print("Decryption failed: \(error)")
+                // Clear corrupted encryption data so future saves work properly
+                cdProduct.encryptedIDCipher = nil
+                cdProduct.encryptedIDNonce = nil
+                cdProduct.encryptedSKUCipher = nil
+                cdProduct.encryptedSKUNonce = nil
+                // Save the cleared encryption state
+                try? coreDataStack.context.save()
                 // Return product with plain values (already loaded)
             }
         }
