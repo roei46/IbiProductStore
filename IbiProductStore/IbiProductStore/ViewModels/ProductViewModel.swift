@@ -16,6 +16,12 @@ class ProductsViewModel: ProductListProtocol {
     private var cancellables = Set<AnyCancellable>()
     private var originalProducts: [Product] = [] 
     
+    // MARK: - Pagination Properties
+    private var currentPage = 0
+    private let pageSize = 20
+    private var isLoadingMore = false
+    private var totalProducts = 0
+    
 
     
     // MARK: - Published Properties
@@ -71,6 +77,19 @@ class ProductsViewModel: ProductListProtocol {
     
     // MARK: - Methods
     func loadProducts() {
+        // Reset pagination for fresh start
+        currentPage = 0
+        originalProducts = []
+        loadProductsPage()
+    }
+    
+    func loadMoreProducts() {
+        guard !isLoading && hasMorePages else { return }
+        currentPage += 1
+        loadProductsPage()
+    }
+    
+    private func loadProductsPage() {
         guard !isLoading else { return }
         
         isLoading = true
@@ -78,12 +97,24 @@ class ProductsViewModel: ProductListProtocol {
         
         Task {
             do {
-                // TODO: - CHECK ASYNC LET??
-                let response: ProductResponse = try await networkService.getProduct()
+                let skip = currentPage * pageSize
+                let response: ProductResponse = try await networkService.getProducts(limit: pageSize, skip: skip)
                 
                 await MainActor.run {
-                    self.originalProducts = response.products
-                    self.applyLocalChanges(to: response.products)
+                    self.totalProducts = response.total
+                    
+                    if self.currentPage == 0 {
+                        // First page - replace all products
+                        self.originalProducts = response.products
+                    } else {
+                        // Additional pages - append products
+                        self.originalProducts.append(contentsOf: response.products)
+                    }
+                    
+                    // Check if we have more pages
+                    self.hasMorePages = self.originalProducts.count < self.totalProducts
+                    
+                    self.applyLocalChanges(to: self.originalProducts)
                     self.isLoading = false
                 }
             } catch {

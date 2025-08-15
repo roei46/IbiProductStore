@@ -79,10 +79,11 @@ class DetailsViewController: UIViewController {
         priceTextField.borderStyle = .none
         priceTextField.backgroundColor = .clear
         priceTextField.keyboardType = .decimalPad
+        priceTextField.autocorrectionType = .no
+        priceTextField.spellCheckingType = .no
         
         // Add done button to price text field toolbar
-        let toolbar = UIToolbar()
-        toolbar.sizeToFit()
+        let toolbar = UIToolbar(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 44))
         let doneButton = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(dismissKeyboard))
         let flexSpace = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
         toolbar.items = [flexSpace, doneButton]

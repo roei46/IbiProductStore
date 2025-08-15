@@ -19,9 +19,9 @@ final class SettingsViewController: UIViewController {
 
     @IBOutlet weak var logOutButton: UIButton!
     var cancellables = Set<AnyCancellable>() // To manage subscriptions
-    private var viewModel: any SettingsType
+    private var viewModel: SettingsViewModel
     
-    init(viewModel: any SettingsType) {
+    init(viewModel: SettingsViewModel) {
         self.viewModel = viewModel
         super.init(nibName: "SettingsViewController", bundle: nil)
     }
@@ -36,6 +36,22 @@ final class SettingsViewController: UIViewController {
         secondLabel.text = viewModel.secondaryLabel
         logOutButton.setTitle(NSLocalizedString(viewModel.buttonLabel, comment: ""), for: .normal)
 
+        // Bind ViewModel state to UI switches
+        viewModel.$isFirstSwitchOn
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] isOn in
+                self?.firstSwitch.isOn = isOn
+            }
+            .store(in: &cancellables)
+            
+        viewModel.$isSecondSwitchOn
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] isOn in
+                self?.secondSwitch.isOn = isOn
+            }
+            .store(in: &cancellables)
+        
+        // Bind UI switch changes to ViewModel
         firstSwitch?.publisher(for: .valueChanged)
             .compactMap { $0 as? UISwitch }
             .map(\.isOn)
@@ -50,6 +66,16 @@ final class SettingsViewController: UIViewController {
         
         logOutButton.tapPublisher
             .subscribe(viewModel.logOutTrigger)
+            .store(in: &cancellables)
+        
+        // Listen for language changes
+        NotificationCenter.default.publisher(for: .languageChanged)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.firstLabel.text = self?.viewModel.label
+                self?.secondLabel.text = self?.viewModel.secondaryLabel
+                self?.logOutButton.setTitle(self?.viewModel.buttonLabel, for: .normal)
+            }
             .store(in: &cancellables)
     }
 }

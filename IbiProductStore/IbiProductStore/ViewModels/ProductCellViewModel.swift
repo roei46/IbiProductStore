@@ -8,6 +8,7 @@
 import Foundation
 import UIKit
 import Combine
+import SDWebImage
 
 class ProductCellViewModel: ObservableObject {
     
@@ -49,17 +50,6 @@ class ProductCellViewModel: ObservableObject {
         return String(format: "%.0f%% OFF", product.discountPercentage)
     }
     
-    var stockStatus: String {
-        switch product.availabilityStatus {
-        case "In Stock":
-            return "✅ In Stock"
-        case "Low Stock":
-            return "⚠️ Low Stock"
-        default:
-            return "❌ Out of Stock"
-        }
-    }
-    
     var rating: String {
         return String(format: "⭐ %.1f", product.rating)
     }
@@ -75,7 +65,12 @@ class ProductCellViewModel: ObservableObject {
         
         isImageLoading = true
         
-        ImageCache.shared.loadImage(from: product.thumbnail) { [weak self] image in
+        guard let url = URL(string: product.thumbnail) else {
+            isImageLoading = false
+            return
+        }
+        
+        SDWebImageManager.shared.loadImage(with: url, progress: nil) { [weak self] image, _, error, _, _, _ in
             DispatchQueue.main.async {
                 self?.thumbnailImage = image
                 self?.isImageLoading = false

@@ -23,12 +23,15 @@ protocol HTTPRequest {
 
 enum Endpoint: HTTPRequest {
     case products
+    case productsWithPagination(limit: Int, skip: Int)
 
     
 var path: String {
         switch self {
         case .products:
             return "https://dummyjson.com/products"
+        case .productsWithPagination(let limit, let skip):
+            return "https://dummyjson.com/products?limit=\(limit)&skip=\(skip)"
         }
     }
     

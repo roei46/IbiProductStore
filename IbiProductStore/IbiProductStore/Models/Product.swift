@@ -87,9 +87,10 @@ extension Product {
     }
     
     var averageRating: Double {
-        guard !reviews.isEmpty else { return rating }
+        guard !reviews.isEmpty && reviews.count > 0 else { return rating }
         let totalRating = reviews.reduce(0) { $0 + $1.rating }
-        return Double(totalRating) / Double(reviews.count)
+        let average = Double(totalRating) / Double(reviews.count)
+        return average.isFinite ? average : rating
     }
     
     var formattedPrice: String {

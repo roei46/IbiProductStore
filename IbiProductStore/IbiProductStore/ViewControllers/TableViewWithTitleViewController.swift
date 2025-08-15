@@ -177,4 +177,14 @@ extension TableViewWithTitleViewController: UITableViewDelegate {
         
         return UISwipeActionsConfiguration(actions: actions)
     }
+    
+    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        // Check if we're near the bottom (last 5 rows) and not already loading
+        let lastRowIndex = viewModel.numberOfProducts - 1
+        let triggerDistance = 5
+        
+        if indexPath.row >= lastRowIndex - triggerDistance && !viewModel.isLoading {
+            viewModel.loadMoreProducts()
+        }
+    }
 }

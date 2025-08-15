@@ -13,8 +13,8 @@ final class PorductService {
 protocol PorductServiceProtocol {
     var apiClient: NetworkService { get set }
     
- 
     func getProduct() async throws -> ProductResponse
+    func getProducts(limit: Int, skip: Int) async throws -> ProductResponse
 }
 
 
@@ -27,5 +27,9 @@ final class ProductService: ObservableObject, PorductServiceProtocol {
     
     func getProduct() async throws -> ProductResponse {
         try await apiClient.fetchData(from: Endpoint.products)
+    }
+    
+    func getProducts(limit: Int, skip: Int) async throws -> ProductResponse {
+        try await apiClient.fetchData(from: Endpoint.productsWithPagination(limit: limit, skip: skip))
     }
 }

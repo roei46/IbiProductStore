@@ -21,11 +21,11 @@ protocol SettingsType:  ObservableObject {
 }
 
 final class SettingsViewModel: SettingsType{
-    var label = NSLocalizedString("dark_mode", comment: "")
-    var secondaryLabel = NSLocalizedString("language", comment: "")
-    var buttonLabel = NSLocalizedString("log_out", comment: "")
+    var label: String { "dark_mode".localized }
+    var secondaryLabel: String { "language".localized }
+    var buttonLabel: String { "log_out".localized }
   
-    
+    private let userDefaults = UserDefaultsService.shared
     private var cancellables = Set<AnyCancellable>()
 
     @Published var isFirstSwitchOn: Bool = false
@@ -33,6 +33,9 @@ final class SettingsViewModel: SettingsType{
     var logOutTrigger = PassthroughSubject<Void, Never>()
 
     init () {
+        // Load saved preferences
+        isFirstSwitchOn = userDefaults.isDarkMode
+        isSecondSwitchOn = userDefaults.selectedLanguage == "he"
         
         $isFirstSwitchOn
             .sink { [weak self] on in
@@ -48,14 +51,10 @@ final class SettingsViewModel: SettingsType{
     }
     
     private func toggleDarkMode(isOn: Bool) {
-        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-             let window = windowScene.windows.first {
-              window.overrideUserInterfaceStyle = isOn ? .dark : .light
-          }
+        userDefaults.isDarkMode = isOn
     }
     
     private func toggleLanguage(isOn: Bool) {
-        Bundle.setLanguage(isOn ? AppLanguage.english.rawValue : AppLanguage.hebrew.rawValue)
-
+        userDefaults.selectedLanguage = isOn ? "he" : "en"
     }
 }

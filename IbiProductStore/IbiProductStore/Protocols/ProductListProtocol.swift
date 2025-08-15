@@ -31,6 +31,7 @@ protocol ProductListProtocol: ObservableObject {
     func cellViewModel(at index: Int) -> ProductCellViewModel
     func product(at index: Int) -> Product
     func loadProducts()
+    func loadMoreProducts()
     func refreshData()
     func refreshOnAppear()
     func navigateToDetail(at index: Int) 
@@ -71,5 +72,6 @@ extension ProductListProtocol {
     func canEdit() -> Bool { return false }
     func deleteProduct(at index: Int) { }
     func addProduct() { }
+    func loadMoreProducts() { }
 }
 // TODO: - DO FROM SCRATCH IN SWIFTUI

@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import SDWebImage
 
 class ImageCollectionViewCell: UICollectionViewCell {
     
@@ -46,10 +47,14 @@ class ImageCollectionViewCell: UICollectionViewCell {
         imageView.image = nil
         activityIndicator.startAnimating()
         
-        ImageCache.shared.loadImage(from: imageUrl) { [weak self] image in
+        guard let url = URL(string: imageUrl) else {
+            activityIndicator.stopAnimating()
+            return
+        }
+        
+        imageView.sd_setImage(with: url, placeholderImage: nil) { [weak self] _, _, _, _ in
             DispatchQueue.main.async {
                 self?.activityIndicator.stopAnimating()
-                self?.imageView.image = image
             }
         }
     }

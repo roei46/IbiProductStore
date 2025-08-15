@@ -113,7 +113,7 @@ class ProductDetailViewModel: DetailsProtocol, ObservableObject {
         // Reset editable fields to current values
         editableTitle = product.title
         editableDescription = product.description
-        editablePrice = String(format: "%.2f", product.price)
+        editablePrice = product.price.isFinite ? String(format: "%.2f", product.price) : "0.00"
     }
     
     func saveChanges() {
@@ -204,7 +204,7 @@ class ProductDetailViewModel: DetailsProtocol, ObservableObject {
         // Reset editable fields to original values
         editableTitle = product.title
         editableDescription = product.description
-        editablePrice = String(format: "%.2f", product.price)
+        editablePrice = product.price.isFinite ? String(format: "%.2f", product.price) : "0.00"
         
         isEditing = false
     }

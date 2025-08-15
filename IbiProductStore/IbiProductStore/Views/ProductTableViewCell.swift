@@ -107,44 +107,4 @@ class ProductTableViewCell: UITableViewCell {
     }
 }
 
-// MARK: - ImageCache
-class ImageCache {
-    static let shared = ImageCache()
-    
-    private let cache = NSCache<NSString, UIImage>()
-    private let session = URLSession.shared
-    
-    private init() {
-        cache.countLimit = 100
-        cache.totalCostLimit = 50 * 1024 * 1024 // 50MB
-    }
-    
-    func loadImage(from urlString: String, completion: @escaping (UIImage?) -> Void) {
-        let key = NSString(string: urlString)
-        
-        // Check cache first
-        if let cachedImage = cache.object(forKey: key) {
-            completion(cachedImage)
-            return
-        }
-        
-        // Load from network
-        guard let url = URL(string: urlString) else {
-            completion(nil)
-            return
-        }
-        
-        session.dataTask(with: url) { [weak self] data, response, error in
-            guard let data = data,
-                  let image = UIImage(data: data),
-                  error == nil else {
-                completion(nil)
-                return
-            }
-            
-            // Cache the image
-            self?.cache.setObject(image, forKey: key)
-            completion(image)
-        }.resume()
-    }
-}
+// SDWebImage handles caching automatically
