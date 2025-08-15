@@ -68,7 +68,7 @@ class TableViewWithTitleViewController: UIViewController {
         tableView.refreshControl = refreshControl
         tableView.separatorStyle = .singleLine
         tableView.rowHeight = UITableView.automaticDimension
-        
+        tableView.estimatedRowHeight = 120
         // Register custom cell
         let nib = UINib(nibName: "ProductTableViewCell", bundle: nil)
         tableView.register(nib, forCellReuseIdentifier: ProductTableViewCell.identifier)
