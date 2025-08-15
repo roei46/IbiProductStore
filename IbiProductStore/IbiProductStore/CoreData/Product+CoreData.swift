@@ -171,15 +171,14 @@ extension CDProduct {
     
     /// Fetch locally deleted product IDs
     static func fetchDeletedIds(context: NSManagedObjectContext) throws -> [Int] {
-        let request: NSFetchRequest<CDProduct> = CDProduct.fetchRequest()
+        let request = NSFetchRequest<NSDictionary>(entityName: "CDProduct")
         request.predicate = NSPredicate(format: "isLocallyDeleted == YES")
         request.propertiesToFetch = ["id"]
         request.resultType = .dictionaryResultType
         
         let results = try context.fetch(request)
         return results.compactMap { dict in
-            if let dict = dict as? [String: Any],
-               let id = dict["id"] as? Int32 {
+            if let id = dict["id"] as? Int32 {
                 return Int(id)
             }
             return nil
