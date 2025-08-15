@@ -89,6 +89,11 @@ class ProductsViewModel: ProductListProtocol {
         return cellViewModels[index]
     }
     
+    func navigateToDetail(at index: Int) {
+        let product = self.product(at: index)
+        productSelectedSubject.send(product)
+    }
+    
     func product(at index: Int) -> Product {
         return cellViewModels[index].getProduct()
     }

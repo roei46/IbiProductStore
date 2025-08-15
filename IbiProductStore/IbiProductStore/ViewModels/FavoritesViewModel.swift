@@ -19,7 +19,13 @@ class FavoritesViewModel: ProductListProtocol {
     @Published var isLoading = false
     @Published var errorMessage: String?
     
-    // MARK: - Publishers
+    // MARK: - Output Publishers
+    private let productSelectedSubject = PassthroughSubject<Product, Never>()
+    var productSelectedPublisher: AnyPublisher<Product, Never> {
+        productSelectedSubject.eraseToAnyPublisher()
+    }
+    
+    // MARK: - Publishers (Protocol Requirement)
     var cellViewModelsPublisher: Published<[ProductCellViewModel]>.Publisher { $cellViewModels }
     var isLoadingPublisher: Published<Bool>.Publisher { $isLoading }
     var errorMessagePublisher: Published<String?>.Publisher { $errorMessage }
@@ -51,6 +57,19 @@ class FavoritesViewModel: ProductListProtocol {
         createCellViewModels(from: favorites)
         
         isLoading = false
+    }
+    
+    func navigateToDetail(at index: Int) {
+        let product = self.product(at: index)
+        productSelectedSubject.send(product)
+    }
+    
+    func cellViewModel(at index: Int) -> ProductCellViewModel {
+        return cellViewModels[index]
+    }
+    
+    func product(at index: Int) -> Product {
+        return cellViewModels[index].getProduct()
     }
     
     func toggleFavorite(at index: Int) {

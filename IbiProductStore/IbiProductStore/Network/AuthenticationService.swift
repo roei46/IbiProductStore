@@ -15,9 +15,7 @@ final class AuthenticationService {
     
     
     
-    init() {
-        
-    }
+    init() {}
     
     
     func login(username: String, password: String) -> AnyPublisher<Bool, Never> {

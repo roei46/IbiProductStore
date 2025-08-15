@@ -7,6 +7,7 @@
 
 import Foundation
 import UIKit
+import Combine
 
 protocol Coordinator: AnyObject {
     var childCoordinators: [Coordinator] { get set }
@@ -24,5 +25,24 @@ extension Coordinator {
                 break
             }
         }
+    }
+    
+    func showError(_ message: String) {
+        let alert = UIAlertController(title: "Error", message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        navigationController.present(alert, animated: true)
+    }
+    
+    func showProductDetail(product: Product, cancellables: inout Set<AnyCancellable>) {
+        let detailViewModel = ProductDetailViewModel(product: product)
+        let detailViewController = DetailsViewController(viewModel: detailViewModel)
+
+        detailViewModel.closeTrigger
+            .sink { [weak self] _ in
+                self?.navigationController.popViewController(animated: true)
+            }
+            .store(in: &cancellables)
+        
+        navigationController.pushViewController(detailViewController, animated: true)
     }
 }

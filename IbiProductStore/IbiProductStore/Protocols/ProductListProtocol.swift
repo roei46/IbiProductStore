@@ -29,6 +29,8 @@ protocol ProductListProtocol: ObservableObject {
     func loadProducts()
     func refreshData()
     func refreshOnAppear()
+    func navigateToDetail(at index: Int) 
+
     
     // MARK: - Favorites Management
     func toggleFavorite(at index: Int)
