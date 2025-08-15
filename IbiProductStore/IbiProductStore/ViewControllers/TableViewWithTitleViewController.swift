@@ -54,6 +54,7 @@ class TableViewWithTitleViewController: UIViewController {
         if viewModel.canEdit() {
             let resetButton = UIButton(type: .system)
             resetButton.setTitle("Reset", for: .normal)
+            resetButton.frame = CGRect(x: 0, y: 0, width: 60, height: 30)
             resetButton.tapPublisher
                 .subscribe(viewModel.resetTrigger)
                 .store(in: &cancellables)
@@ -63,6 +64,7 @@ class TableViewWithTitleViewController: UIViewController {
             let addButton = UIButton(type: .system)
             addButton.setTitle("+", for: .normal)
             addButton.titleLabel?.font = UIFont.systemFont(ofSize: 24, weight: .medium)
+            addButton.frame = CGRect(x: 0, y: 0, width: 30, height: 30)
             addButton.tapPublisher
                 .sink { [weak self] in
                     self?.viewModel.addProduct()

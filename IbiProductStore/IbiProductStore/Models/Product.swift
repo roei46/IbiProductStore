@@ -93,10 +93,16 @@ extension Product {
     }
     
     var formattedPrice: String {
+        guard price.isFinite && !price.isNaN else {
+            return "$0.00"
+        }
         return String(format: "$%.2f", price)
     }
     
     var formattedDiscountedPrice: String {
+        guard discountedPrice.isFinite && !discountedPrice.isNaN else {
+            return "$0.00"
+        }
         return String(format: "$%.2f", discountedPrice)
     }
 }
