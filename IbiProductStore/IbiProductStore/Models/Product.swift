@@ -39,6 +39,13 @@ struct Product: Codable, Identifiable {
     let meta: Meta
     let images: [String]
     let thumbnail: String
+    
+    // Not part of API response, handled locally
+    var isFavorite: Bool = false
+    
+    private enum CodingKeys: String, CodingKey {
+        case id, title, description, category, price, discountPercentage, rating, stock, tags, brand, sku, weight, dimensions, warrantyInformation, shippingInformation, availabilityStatus, reviews, returnPolicy, minimumOrderQuantity, meta, images, thumbnail
+    }
 }
 
 // MARK: - Dimensions

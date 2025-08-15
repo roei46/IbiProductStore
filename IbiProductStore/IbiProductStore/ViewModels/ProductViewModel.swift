@@ -95,8 +95,18 @@ class ProductsViewModel: ProductListProtocol {
     
     // MARK: - ProductListProtocol Implementation
     func toggleFavorite(at index: Int) {
-        // TODO: - Maybe add so Product is favorite?
-        let product = product(at: index)
+        var product = product(at: index)
+        print("🔄 Before toggle: \(product.title) - isFavorite: \(product.isFavorite)")
+        product.isFavorite.toggle()
+        print("🔄 After toggle: \(product.title) - isFavorite: \(product.isFavorite)")
+        
+        // Update the product in the array by ID
+        if let productIndex = products.firstIndex(where: { $0.id == product.id }) {
+            products[productIndex] = product
+            print("✅ Updated product in array at index: \(productIndex)")
+        }
+        
+        // Save to Core Data
         localStorageService.toggleFavorite(product)
     }
     
@@ -159,10 +169,12 @@ class ProductsViewModel: ProductListProtocol {
     
     // Override to prevent unnecessary reloads on products screen
     func refreshOnAppear() {
-        // Products screen doesn't need to reload on appear since it loads from server once
-        // Only reload if there are no products
         if products.isEmpty {
+            // Load from server if no products
             loadProducts()
+        } else {
+            // Refresh local changes (favorites, modifications) when returning to screen
+            applyLocalChanges(to: originalProducts)
         }
     }
     
@@ -175,14 +187,20 @@ class ProductsViewModel: ProductListProtocol {
         let modifiedProducts = localStorageService.loadModifiedProducts()
         let addedProducts = localStorageService.loadAddedProducts()
         let deletedIds = localStorageService.loadDeletedProductIds()
+        let favoriteProducts = localStorageService.loadFavorites()
         
-        // Create dictionary for quick lookup of modified products
+        // Create dictionaries for quick lookup
         let modifiedDict = Dictionary(uniqueKeysWithValues: modifiedProducts.map { ($0.id, $0) })
+        let favoriteIds = Set(favoriteProducts.map { $0.id })
         
-        // Filter out deleted products and apply modifications
+        // Filter out deleted products, apply modifications, and set favorite status
         var processedProducts = serverProducts
             .filter { !deletedIds.contains($0.id) }
-            .map { modifiedDict[$0.id] ?? $0 }
+            .map { product in
+                var finalProduct = modifiedDict[product.id] ?? product
+                finalProduct.isFavorite = favoriteIds.contains(product.id)
+                return finalProduct
+            }
         
         // Add custom products at the beginning
         processedProducts = addedProducts + processedProducts

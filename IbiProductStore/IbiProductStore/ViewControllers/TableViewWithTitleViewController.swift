@@ -68,7 +68,6 @@ class TableViewWithTitleViewController: UIViewController {
         tableView.refreshControl = refreshControl
         tableView.separatorStyle = .singleLine
         tableView.rowHeight = UITableView.automaticDimension
-        tableView.estimatedRowHeight = 120
         
         // Register custom cell
         let nib = UINib(nibName: "ProductTableViewCell", bundle: nil)
@@ -169,7 +168,7 @@ extension TableViewWithTitleViewController: UITableViewDelegate {
         
         // Favorite action
         let product = viewModel.product(at: indexPath.row)
-        let isFavorite = viewModel.isFavorite(product)
+        let isFavorite = product.isFavorite
         
         let favoriteAction = UIContextualAction(
             style: .normal,
@@ -183,13 +182,13 @@ extension TableViewWithTitleViewController: UITableViewDelegate {
         actions.append(favoriteAction)
         
         // Delete action (only for editable lists)
-        if viewModel.canEdit() {
-            let deleteAction = UIContextualAction(style: .destructive, title: "Delete") { [weak self] _, _, completion in
-                self?.confirmDelete(at: indexPath, completion: completion)
-            }
-            deleteAction.image = UIImage(systemName: "trash")
-            actions.append(deleteAction)
-        }
+//        if viewModel.canEdit() {
+//            let deleteAction = UIContextualAction(style: .destructive, title: "Delete") { [weak self] _, _, completion in
+//                self?.confirmDelete(at: indexPath, completion: completion)
+//            }
+//            deleteAction.image = UIImage(systemName: "trash")
+//            actions.append(deleteAction)
+//        }
         
         return UISwipeActionsConfiguration(actions: actions)
     }

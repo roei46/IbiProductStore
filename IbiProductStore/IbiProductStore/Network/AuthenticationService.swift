@@ -22,10 +22,14 @@ final class AuthenticationService {
     
     func login(username: String, password: String) -> AnyPublisher<Bool, Never> {
         let isValid = username == testUser.username && password == testUser.password
+        let subject = PassthroughSubject<Bool, Never>()
         
-        return Just(isValid)
-            .delay(for: .seconds(1), scheduler: DispatchQueue.main)
-            .eraseToAnyPublisher()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 4) {
+            subject.send(isValid)
+            subject.send(completion: .finished)
+        }
+        
+        return subject.eraseToAnyPublisher()
     }
     
     func authenticateWithBiometrics() -> AnyPublisher<Bool, Never> {
@@ -48,12 +52,6 @@ final class AuthenticationService {
         }
         
         return subject.eraseToAnyPublisher()
-    }
-    
-    func isBiometricAvailable() -> Bool {
-        let context = LAContext()
-        var error: NSError?
-        return context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error)
     }
     
     func logout() {

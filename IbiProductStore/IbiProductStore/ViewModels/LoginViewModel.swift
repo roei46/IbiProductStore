@@ -56,22 +56,26 @@ class LoginViewModel {
               .store(in: &cancellables)
     }
     
-    // MARK: - Methods
+
     func login() {
         isLoading = true
         errorMessage = nil
         
         authService.login(username: username, password: password)
-            .sink { [weak self] success in
-                self?.isLoading = false
-                
-                if success {
-                    self?.authService.setLoggedIn(true)
-                    self?.loginSuccessSubject.send()
-                } else {
-                    self?.errorMessage = "Invalid username or password"
+            .receive(on: DispatchQueue.main)
+            .sink(
+                receiveCompletion: { [weak self] completion in
+                    self?.isLoading = false
+                },
+                receiveValue: { [weak self] success in
+                    if success {
+                        self?.authService.setLoggedIn(true)
+                        self?.loginSuccessSubject.send()
+                    } else {
+                        self?.errorMessage = "Invalid username or password"
+                    }
                 }
-            }
+            )
             .store(in: &cancellables)
     }
     
@@ -92,9 +96,4 @@ class LoginViewModel {
             }
             .store(in: &cancellables)
     }
-    
-    func isBiometricAvailable() -> Bool {
-        return authService.isBiometricAvailable()
-    }
-        
 }

@@ -30,22 +30,19 @@ class LoginViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        // Bind text fields to view model using your simple extension
         userTextField.textPublisher
-            .compactMap { $0 } // Convert String? to String
+            .compactMap { $0 }
             .assign(to: \.username, on: viewModel)
             .store(in: &cancellables)
         
         passwordTextField.textPublisher
-            .compactMap { $0 } // Convert String? to String
+            .compactMap { $0 }
             .assign(to: \.password, on: viewModel)
             .store(in: &cancellables)
         
-        // Set initial values
         viewModel.username = userTextField.text ?? ""
         viewModel.password = passwordTextField.text ?? ""
         
-        // Bind login button enabled state
         viewModel.isLoginButtonEnabled
             .receive(on: DispatchQueue.main)
             .assign(to: \.isEnabled, on: loginButton)
@@ -55,18 +52,10 @@ class LoginViewController: UIViewController {
             .subscribe(viewModel.loginTrigger)
             .store(in: &cancellables)
         loginButton
-            .bindLoading(to: viewModel.$isLoading, animationName: "spinner", cancellables: &cancellables)
+            .bindLoading(to: viewModel.$isLoading, animationName: "loader", cancellables: &cancellables)
         
         biometricButton.tapPublisher
             .subscribe(viewModel.loginBioTrigger)
-            .store(in: &cancellables)
-        
-        // Debug: Check if loading state changes
-        viewModel.$isLoading
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] isLoading in
-                print("🔄 Loading state changed: \(isLoading)")
-            }
             .store(in: &cancellables)
         
     }

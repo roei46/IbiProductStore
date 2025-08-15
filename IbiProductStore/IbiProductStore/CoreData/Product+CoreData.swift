@@ -108,7 +108,7 @@ extension CDProduct {
         
         // Note: Decryption will be handled by CoreDataStorageService
         // This method assumes decryption already happened
-        return Product(
+        var product = Product(
             id: Int(self.id),
             title: self.title ?? "",
             description: self.descriptionText ?? "",
@@ -132,6 +132,8 @@ extension CDProduct {
             images: self.images ?? [],
             thumbnail: self.thumbnail ?? ""
         )
+        product.isFavorite = self.isFavorite
+        return product
     }
 }
 

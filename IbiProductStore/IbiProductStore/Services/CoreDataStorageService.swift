@@ -197,17 +197,8 @@ final class CoreDataStorageService: LocalStorageServiceProtocol {
     
     // MARK: - Favorites Helper Methods
     func isFavorite(_ product: Product) -> Bool {
-        let context = coreDataStack.context
-        
-        do {
-            if let cdProduct = try CDProduct.findByID(product.id, context: context) {
-                return cdProduct.isFavorite && !cdProduct.isLocallyDeleted
-            }
-            return false
-        } catch {
-            print("Error checking favorite status: \(error)")
-            return false
-        }
+        // Now we can just use the product's isFavorite property
+        return product.isFavorite
     }
     
     func addToFavorites(_ product: Product) {
@@ -243,10 +234,11 @@ final class CoreDataStorageService: LocalStorageServiceProtocol {
     }
     
     func toggleFavorite(_ product: Product) {
-        if isFavorite(product) {
-            removeFromFavorites(product)
-        } else {
+        // Product.isFavorite already reflects the desired state
+        if product.isFavorite {
             addToFavorites(product)
+        } else {
+            removeFromFavorites(product)
         }
     }
     
@@ -336,7 +328,7 @@ final class CoreDataStorageService: LocalStorageServiceProtocol {
                 let decryptedSKU = try EncryptionHelper.decrypt(cipher: skuCipher, nonceData: skuNonce, using: encryptionKey)
                 
                 // Create new product with decrypted values
-                product = Product(
+                var newProduct = Product(
                     id: Int(decryptedID) ?? product.id,
                     title: product.title,
                     description: product.description,
@@ -360,6 +352,8 @@ final class CoreDataStorageService: LocalStorageServiceProtocol {
                     images: product.images,
                     thumbnail: product.thumbnail
                 )
+                newProduct.isFavorite = product.isFavorite
+                product = newProduct
             } catch {
                 print("Decryption failed: \(error)")
                 // Return product with plain values (already loaded)

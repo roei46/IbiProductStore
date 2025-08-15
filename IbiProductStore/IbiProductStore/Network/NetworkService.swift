@@ -84,8 +84,6 @@ final class NetworkService: FetchData {
         do {
             let decodedResponse = try JSONDecoder().decode(T.self, from: data)
             return decodedResponse
-        } catch let decodingError as DecodingError {
-            throw APIError.invalidData
         } catch {
             throw APIError.invalidData
         }

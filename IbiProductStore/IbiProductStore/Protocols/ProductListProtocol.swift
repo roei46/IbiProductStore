@@ -74,4 +74,4 @@ extension ProductListProtocol {
     func deleteProduct(at index: Int) { }
     func resetToServer() { }
 }
-// TODO: - DO FROM SCRATCH IN SWIFTUI 
+// TODO: - DO FROM SCRATCH IN SWIFTUI
