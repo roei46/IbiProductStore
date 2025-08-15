@@ -104,9 +104,7 @@ class TableViewWithTitleViewController: UIViewController {
                 }
             }
             .store(in: &cancellables)
-        
-        
-        
+
     }
     
     private func loadInitialData() {

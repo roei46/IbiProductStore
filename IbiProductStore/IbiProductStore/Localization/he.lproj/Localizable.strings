@@ -1,0 +1,10 @@
+/* 
+  Localizable.strings
+  IbiProductStore
+
+  Created by Roei Baruch on 15/08/2025.
+  
+*/
+"dark_mode" = "מצב לילה";
+"language" = "שפה";
+"log_out" = "התנתק";

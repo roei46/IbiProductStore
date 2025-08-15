@@ -49,23 +49,23 @@ class MainTabCoordinator: Coordinator {
 
         // Settings Tab
         let settingsNav = UINavigationController()
-//        let settingsCoordinator = SettingsCoordinator(navigationController: settingsNav)
-//        childCoordinators.append(settingsCoordinator)
-//        
-//        // Subscribe to logout from settings
-//        settingsCoordinator.logoutPublisher
-//            .sink { [weak self] in
-//                self?.logoutSubject.send()
-//            }
-//            .store(in: &settingsCoordinator.cancellables)
-//        
-//        settingsCoordinator.start()
+        let settingsCoordinator = SettingsCoordinator(navigationController: settingsNav)
+        childCoordinators.append(settingsCoordinator)
+  
+        // Subscribe to logout from settings
+        settingsCoordinator.logoutPublisher
+            .sink { [weak self] in
+                self?.logoutSubject.send()
+            }
+            .store(in: &settingsCoordinator.cancellables)
+
+        settingsCoordinator.start()
         settingsNav.tabBarItem = UITabBarItem(
             title: "Settings",
             image: UIImage(systemName: "gear"),
             tag: 2
         )
-//        
+        
         tabBarController.viewControllers = [productsNav, favoritesNav, settingsNav]
         navigationController.setViewControllers([tabBarController], animated: true)
     }
