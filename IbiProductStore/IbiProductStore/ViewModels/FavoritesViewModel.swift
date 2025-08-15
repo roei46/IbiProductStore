@@ -25,6 +25,12 @@ class FavoritesViewModel: ProductListProtocol {
         productSelectedSubject.eraseToAnyPublisher()
     }
     
+    // MARK: - Triggers (Not used in favorites)
+    let resetTrigger = PassthroughSubject<Void, Never>()
+    var resetTriggerPublisher: AnyPublisher<Void, Never> {
+        resetTrigger.eraseToAnyPublisher()
+    }
+    
     // MARK: - Publishers (Protocol Requirement)
     var cellViewModelsPublisher: Published<[ProductCellViewModel]>.Publisher { $cellViewModels }
     var isLoadingPublisher: Published<Bool>.Publisher { $isLoading }
@@ -86,7 +92,6 @@ class FavoritesViewModel: ProductListProtocol {
     
     // MARK: - CRUD Operations (Not supported for favorites)
     func canEdit() -> Bool { return false }
-    func canAdd() -> Bool { return false }
     
     // MARK: - Private Methods
     private func createCellViewModels(from products: [Product]) {

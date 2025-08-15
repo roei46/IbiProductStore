@@ -19,6 +19,10 @@ protocol ProductListProtocol: ObservableObject {
     var isLoadingPublisher: Published<Bool>.Publisher { get }
     var errorMessagePublisher: Published<String?>.Publisher { get }
     
+    // MARK: - Triggers
+    var resetTrigger: PassthroughSubject<Void, Never> { get }
+    var resetTriggerPublisher: AnyPublisher<Void, Never> { get }
+    
     // MARK: - Computed Properties
     var numberOfProducts: Int { get }
     var screenTitle: String { get }
@@ -38,16 +42,11 @@ protocol ProductListProtocol: ObservableObject {
     
     // MARK: - CRUD Operations
     func canEdit() -> Bool
-//    func canAdd() -> Bool
-    func editProduct(at index: Int, with product: Product)
-    func addProduct(_ product: Product)
     func deleteProduct(at index: Int)
-    func resetToServer()
 }
 
 // MARK: - Default Implementations
 extension ProductListProtocol {
-    // TODO: - SHOWERROR FOR ALL COORDINATORS?
     var numberOfProducts: Int {
         return cellViewModels.count
     }
@@ -65,15 +64,11 @@ extension ProductListProtocol {
     }
     
     func refreshOnAppear() {
-        loadProducts()  // Default: just reload data
+        loadProducts()
     }
     
     // Default CRUD implementations (can be overridden)
     func canEdit() -> Bool { return false }
-//    func canAdd() -> Bool { return false }
-    func editProduct(at index: Int, with product: Product) { }
-    func addProduct(_ product: Product) { }
     func deleteProduct(at index: Int) { }
-    func resetToServer() { }
 }
 // TODO: - DO FROM SCRATCH IN SWIFTUI

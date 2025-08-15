@@ -30,6 +30,13 @@ class ProductsCoordinator: Coordinator {
             }
             .store(in: &cancellables)
         
+        // Subscribe to reset trigger
+        productsViewModel.resetTriggerPublisher
+            .sink { [weak self] in
+                self?.handleResetTrigger(viewModel: productsViewModel)
+            }
+            .store(in: &cancellables)
+        
         // Subscribe to errors and handle them in coordinator
         productsViewModel.$errorMessage
             .compactMap { $0 }
@@ -39,5 +46,20 @@ class ProductsCoordinator: Coordinator {
             .store(in: &cancellables)
         
         navigationController.pushViewController(productsViewController, animated: false)
+    }
+    
+    private func handleResetTrigger(viewModel: ProductsViewModel) {
+        let alert = UIAlertController(
+            title: "Reset Products",
+            message: "This will reset all changes and reload from server. Are you sure?",
+            preferredStyle: .alert
+        )
+        
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        alert.addAction(UIAlertAction(title: "Reset", style: .destructive) {  _ in
+            viewModel.resetToServer()
+        })
+        
+        navigationController.present(alert, animated: true)
     }
 }

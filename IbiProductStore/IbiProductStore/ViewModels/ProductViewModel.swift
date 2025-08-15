@@ -31,6 +31,12 @@ class ProductsViewModel: ProductListProtocol {
         productSelectedSubject.eraseToAnyPublisher()
     }
     
+    // MARK: - Triggers
+    let resetTrigger = PassthroughSubject<Void, Never>()
+    var resetTriggerPublisher: AnyPublisher<Void, Never> {
+        resetTrigger.eraseToAnyPublisher()
+    }
+    
     // MARK: - Publishers (Protocol Requirement)
     var cellViewModelsPublisher: Published<[ProductCellViewModel]>.Publisher { $cellViewModels }
     var isLoadingPublisher: Published<Bool>.Publisher { $isLoading }
@@ -121,31 +127,6 @@ class ProductsViewModel: ProductListProtocol {
     
     // MARK: - CRUD Operations
     func canEdit() -> Bool { return true }
-    func canAdd() -> Bool { return true }
-    
-    func editProduct(at index: Int, with updatedProduct: Product) {
-        // Update in current list
-        products[index] = updatedProduct
-        
-        // Save to local storage
-        var modifiedProducts = localStorageService.loadModifiedProducts()
-        if let existingIndex = modifiedProducts.firstIndex(where: { $0.id == updatedProduct.id }) {
-            modifiedProducts[existingIndex] = updatedProduct
-        } else {
-            modifiedProducts.append(updatedProduct)
-        }
-        localStorageService.saveModifiedProducts(modifiedProducts)
-    }
-    
-    func addProduct(_ product: Product) {
-        // Add to current list
-        products.insert(product, at: 0)
-        
-        // Save to local storage
-        var addedProducts = localStorageService.loadAddedProducts()
-        addedProducts.append(product)
-        localStorageService.saveAddedProducts(addedProducts)
-    }
     
     func deleteProduct(at index: Int) {
         let product = products[index]
@@ -168,8 +149,9 @@ class ProductsViewModel: ProductListProtocol {
         // Clear all local changes
         localStorageService.clearAllLocalData()
         
-        // Reset to original products
+        // Reset to original products and reload
         products = originalProducts
+        loadProducts()
     }
     
     // Override to prevent unnecessary reloads on products screen
