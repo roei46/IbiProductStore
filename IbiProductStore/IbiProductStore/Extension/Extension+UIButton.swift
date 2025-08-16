@@ -20,13 +20,11 @@ extension UIButton {
         return subviews.contains { $0 is LottieAnimationView || $0 is UIActivityIndicatorView }
     }
     
-    func bindLoading<P: Publisher>(
-        to publisher: P,
+    func bindLoading<T: Publisher>(
+        to publisher: T,
         animationName: String,
         cancellables: inout Set<AnyCancellable>
-    ) where P.Output == Bool, P.Failure == Never {
-        
-        // Clean Swift approach - caller manages the subscription
+    ) where T.Output == Bool, T.Failure == Never {
         publisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] isLoading in
@@ -47,21 +45,16 @@ extension UIButton {
             guard let self = self else { return }
             guard !self.isCurrentlyLoading else { return }
             
-            // Store original title in accessibility identifier temporarily
             let originalTitle = self.title(for: .normal)
             self.accessibilityValue = originalTitle
             
-            // Clear button text and disable interaction
             self.setTitle("", for: .normal)
             self.isUserInteractionEnabled = false
             
-            // Create and configure Lottie animation
             let loader = LottieAnimationView(name: animationName)
             
-            // Handle case where animation file doesn't exist
             if loader.animation == nil {
                 print("⚠️ Lottie animation '\(animationName)' not found")
-                // Fallback to simple activity indicator
                 self.showActivityIndicator()
                 return
             }
@@ -82,9 +75,9 @@ extension UIButton {
     }
     
     private func showActivityIndicator() {
-        let indicator = UIActivityIndicatorView(style: .large) // Larger size
+        let indicator = UIActivityIndicatorView(style: .large)
         indicator.translatesAutoresizingMaskIntoConstraints = false
-        indicator.color = .white // Force white color for visibility
+        indicator.color = .white
         self.addSubview(indicator)
         
         NSLayoutConstraint.activate([
@@ -100,7 +93,6 @@ extension UIButton {
             guard let self = self else { return }
             guard self.isCurrentlyLoading else { return }
             
-            // Stop and remove all loading views
             self.subviews.compactMap { $0 as? LottieAnimationView }.forEach {
                 $0.stop()
                 $0.removeFromSuperview()
@@ -109,7 +101,6 @@ extension UIButton {
                 $0.removeFromSuperview()
             }
             
-            // Restore original state
             let originalTitle = self.accessibilityValue
             self.setTitle(originalTitle, for: .normal)
             self.accessibilityValue = nil // Clear temporary storage
@@ -117,7 +108,6 @@ extension UIButton {
         }
     }
     
-    // Call this when button is no longer needed
     func prepareForReuse() {
         hideLoading()
     }

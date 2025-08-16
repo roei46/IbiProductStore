@@ -20,10 +20,3 @@ final class LocalizationHelper {
         return bundle.localizedString(forKey: key, value: key, table: nil)
     }
 }
-
-// MARK: - String Extension
-extension String {
-    var localized: String {
-        return LocalizationHelper.localizedString(for: self)
-    }
-}
