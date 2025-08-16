@@ -185,18 +185,9 @@ class ProductsViewModel: ProductListProtocol {
         // Remove from current list
         products.remove(at: index)
         
-        do {
-            // Add to deleted IDs
-            var deletedIds = try localStorageService.loadDeletedProductIds()
-            deletedIds.append(product.id)
-            try localStorageService.saveDeletedProductIds(deletedIds)
-            
-            // Remove from favorites if it was favorited
-            if localStorageService.isFavorite(product) {
-                localStorageService.removeFromFavorites(product)
-            }
-        } catch {
-            self.errorMessage = error.localizedDescription
+        // Remove from favorites if it was favorited
+        if localStorageService.isFavorite(product) {
+            localStorageService.removeFromFavorites(product)
         }
     }
     
@@ -230,18 +221,16 @@ class ProductsViewModel: ProductListProtocol {
     
     private func applyLocalChanges(to serverProducts: [Product]) {
         do {
+            //Keeping it sequential(coreData is fast no need to async context in background)
             let modifiedProducts = try localStorageService.loadModifiedProducts()
             let addedProducts = try localStorageService.loadAddedProducts()
-            let deletedIds = try localStorageService.loadDeletedProductIds()
             let favoriteProducts = try localStorageService.loadFavorites()
             
             // Create dictionaries for quick lookup
             let modifiedDict = Dictionary(uniqueKeysWithValues: modifiedProducts.map { ($0.id, $0) })
             let favoriteIds = Set(favoriteProducts.map { $0.id })
             
-            // Filter out deleted products, apply modifications, and set favorite status
             var processedProducts = serverProducts
-                .filter { !deletedIds.contains($0.id) }
                 .map { product in
                     var finalProduct = modifiedDict[product.id] ?? product
                     finalProduct.isFavorite = favoriteIds.contains(product.id)

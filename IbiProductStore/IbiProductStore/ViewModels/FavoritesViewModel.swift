@@ -89,20 +89,11 @@ class FavoritesViewModel: ProductListProtocol {
     func deleteProduct(at index: Int) {
         let product = product(at: index)
         
-        do {
-            // Remove from favorites
-            localStorageService.removeFromFavorites(product)
-            
-            // Add to deleted IDs
-            var deletedIds = try localStorageService.loadDeletedProductIds()
-            deletedIds.append(product.id)
-            try localStorageService.saveDeletedProductIds(deletedIds)
-            
-            // Remove from current list
-            cellViewModels.remove(at: index)
-        } catch {
-            self.errorMessage = error.localizedDescription
-        }
+        // Remove from favorites
+        localStorageService.removeFromFavorites(product)
+        
+        // Remove from current list
+        cellViewModels.remove(at: index)
     }
     
     func navigateToDetail(at index: Int) {

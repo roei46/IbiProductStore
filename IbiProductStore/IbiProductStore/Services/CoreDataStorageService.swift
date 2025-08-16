@@ -111,59 +111,28 @@ final class CoreDataStorageService: LocalStorageServiceProtocol {
         }
     }
     
-    // MARK: - Deleted Product IDs
-    func saveDeletedProductIds(_ ids: [Int]) throws {
-        let context = coreDataStack.context
-        
-        do {
-            for id in ids {
-                if let existingProduct = try CDProduct.findByID(id, context: context) {
-                    existingProduct.isLocallyDeleted = true
-                } else {
-                    // Create a minimal product record just to track deletion
-                    let cdProduct = CDProduct(context: context)
-                    cdProduct.id = Int32(id)
-                    cdProduct.isLocallyDeleted = true
-                    cdProduct.title = "Deleted Product"
-                }
-            }
-            
-            coreDataStack.save()
-        } catch {
-            throw CoreDataError("Failed to save deleted product IDs", underlyingError: error)
-        }
-    }
-    
-    func loadDeletedProductIds() throws -> [Int] {
-        let context = coreDataStack.context
-        
-        do {
-            return try CDProduct.fetchDeletedIds(context: context)
-        } catch {
-            throw CoreDataError("Failed to load deleted product IDs", underlyingError: error)
-        }
-    }
     
     // MARK: - Clear Data
     func clearAllLocalData() throws {
         let context = coreDataStack.context
         
         do {
-            // Reset all local flags instead of deleting everything
-            let request: NSFetchRequest<CDProduct> = CDProduct.fetchRequest()
-            let allProducts = try context.fetch(request)
-
-            for product in allProducts {
-                if product.isLocallyAdded {
-                    // Delete locally added products completely
-                    context.delete(product)
-                } else {
-                    // Reset flags for server products
-                    product.isFavorite = false
-                    product.isLocallyModified = false
-                    product.isLocallyDeleted = false
-                }
-            }
+            // Delete locally added products with batch delete
+            let fetchRequest: NSFetchRequest<NSFetchRequestResult> = CDProduct.fetchRequest()
+            fetchRequest.predicate = NSPredicate(format: "isLocallyAdded == YES")
+            let deleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
+            
+            try context.execute(deleteRequest)
+            
+            // Reset flags for server products with batch update
+            let updateRequest = NSBatchUpdateRequest(entityName: "CDProduct")
+            updateRequest.predicate = NSPredicate(format: "isLocallyAdded == NO")
+            updateRequest.propertiesToUpdate = [
+                "isFavorite": false,
+                "isLocallyModified": false,
+                "isLocallyDeleted": false
+            ]
+            try context.execute(updateRequest)
             
             coreDataStack.save()
         } catch {
