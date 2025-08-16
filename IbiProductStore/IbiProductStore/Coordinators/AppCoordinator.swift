@@ -26,7 +26,6 @@ final class AppCoordinator: Coordinator {
         let loginCoordinator = LoginCoordinator(navigationController: navigationController)
         childCoordinators.append(loginCoordinator)
         
-        // Subscribe to login success
         loginCoordinator.loginSuccessPublisher
             .sink { [weak self] in
                 self?.childDidFinish(loginCoordinator)
@@ -41,7 +40,6 @@ final class AppCoordinator: Coordinator {
         let mainCoordinator = MainTabCoordinator(navigationController: navigationController)
         childCoordinators.append(mainCoordinator)
         
-        // Subscribe to logout
         mainCoordinator.logoutPublisher
             .sink { [weak self] in
                 self?.childDidFinish(mainCoordinator)

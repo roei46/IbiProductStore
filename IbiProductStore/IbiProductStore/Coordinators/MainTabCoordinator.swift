@@ -9,7 +9,7 @@ import Foundation
 import UIKit
 import Combine
 
-class MainTabCoordinator: Coordinator {
+final class MainTabCoordinator: Coordinator {
     var childCoordinators = [Coordinator]()
     var navigationController: UINavigationController
     private var coreDataStack: CoreDataStack
@@ -56,7 +56,6 @@ class MainTabCoordinator: Coordinator {
         let settingsCoordinator = SettingsCoordinator(navigationController: settingsNav)
         childCoordinators.append(settingsCoordinator)
   
-        // Subscribe to logout from settings
         settingsCoordinator.logoutPublisher
             .sink { [weak self] in
                 self?.logoutSubject.send()
