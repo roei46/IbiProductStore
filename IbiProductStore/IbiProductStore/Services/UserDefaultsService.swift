@@ -8,9 +8,15 @@
 import Foundation
 import UIKit
 
-final class UserDefaultsService {
+final class UserDefaultsService: ObservableObject {
     
     static let shared = UserDefaultsService()
+    
+    @Published var currentLanguage: String = "en"
+    
+    private init() {
+        currentLanguage = UserDefaults.standard.string(forKey: Keys.language) ?? "en"
+    }
     
     // MARK: - Keys
     private enum Keys {
@@ -30,12 +36,13 @@ final class UserDefaultsService {
     }
     
     // MARK: - Language
-    var selectedLanguage: String {
+   var selectedLanguage: String {
         get {
             return UserDefaults.standard.string(forKey: Keys.language) ?? "en"
         }
         set {
             UserDefaults.standard.set(newValue, forKey: Keys.language)
+            currentLanguage = newValue
             applyLanguage(newValue)
         }
     }

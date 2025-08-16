@@ -35,8 +35,8 @@ class MainTabCoordinator: Coordinator {
             image: UIImage(systemName: "list.bullet"),
             tag: 0
         )
-//        
-//        // Favorites Tab
+
+        // Favorites Tab
         let favoritesNav = UINavigationController()
         let favoritesCoordinator = FavoritesCoordinator(navigationController: favoritesNav)
         childCoordinators.append(favoritesCoordinator)

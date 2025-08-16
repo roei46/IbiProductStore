@@ -10,20 +10,18 @@ import Combine
 import UIKit
 
 protocol SettingsType:  ObservableObject {
-    var label: String { get }
-    var secondaryLabel: String { get }
-    var buttonLabel: String { get }
-
+    var label: String { get set }
+    var secondaryLabel: String { get set }
+    var buttonLabel: String { get set }
     var isFirstSwitchOn: Bool { get set }
     var isSecondSwitchOn: Bool { get set }
-    
     var logOutTrigger: PassthroughSubject<Void, Never> { get set }
 }
 
 final class SettingsViewModel: SettingsType{
-    var label: String { "dark_mode".localized }
-    var secondaryLabel: String { "language".localized }
-    var buttonLabel: String { "log_out".localized }
+    @Published var label: String = "dark_mode".localized
+    @Published var secondaryLabel: String = "language".localized  
+    @Published var buttonLabel: String = "log_out".localized
   
     private let userDefaults = UserDefaultsService.shared
     private var cancellables = Set<AnyCancellable>()
@@ -48,6 +46,19 @@ final class SettingsViewModel: SettingsType{
                 self?.toggleLanguage(isOn: on)
         }
         .store(in: &cancellables)
+        
+        // Observe language changes and update labels
+        userDefaults.$currentLanguage
+            .sink { [weak self] _ in
+                self?.updateLabels()
+            }
+            .store(in: &cancellables)
+    }
+    
+    private func updateLabels() {
+        label = "dark_mode".localized
+        secondaryLabel = "language".localized
+        buttonLabel = "log_out".localized
     }
     
     private func toggleDarkMode(isOn: Bool) {

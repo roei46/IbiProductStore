@@ -18,13 +18,10 @@ protocol AuthProtocol {
 }
 
 final class AuthenticationService: AuthProtocol {
-    
+
     private let testUser = User(username: "testuser", password: "password123")
     
-    
-    
     init() {}
-    
     
     func login(username: String, password: String) -> AnyPublisher<Bool, Never> {
         let isValid = username == testUser.username && password == testUser.password
