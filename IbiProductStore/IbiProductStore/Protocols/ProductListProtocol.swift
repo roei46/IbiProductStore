@@ -25,7 +25,9 @@ protocol ProductListProtocol: ObservableObject {
     
     // MARK: - Computed Properties
     var numberOfProducts: Int { get }
-    var screenTitle: String { get }
+    var screenTitlePublisher: Published<String>.Publisher { get }
+    var screenSubTitlePublisher: Published<String>.Publisher { get }
+
     
     // MARK: - Methods
     func cellViewModel(at index: Int) -> ProductCellViewModel

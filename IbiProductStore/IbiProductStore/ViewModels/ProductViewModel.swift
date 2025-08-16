@@ -52,11 +52,13 @@ class ProductsViewModel: ProductListProtocol {
     var cellViewModelsPublisher: Published<[ProductCellViewModel]>.Publisher { $cellViewModels }
     var isLoadingPublisher: Published<Bool>.Publisher { $isLoading }
     var errorMessagePublisher: Published<String?>.Publisher { $errorMessage }
+    private let userDefaults = UserDefaultsService.shared
     
-    // MARK: - Computed Properties
-    var screenTitle: String {
-        return "Products"
-    }
+    @Published var screenTitle: String = "prod".localized
+    @Published var subTitle: String = "all_products".localized
+    var screenTitlePublisher: Published<String>.Publisher { $screenTitle }
+    var screenSubTitlePublisher: Published<String>.Publisher { $subTitle }
+
     
     // MARK: - Initialization
     init(productService: ProductService = .init(), localStorageService: LocalStorageServiceProtocol = CoreDataStorageService.shared) {
@@ -73,9 +75,19 @@ class ProductsViewModel: ProductListProtocol {
             }
             .store(in: &cancellables)
         
+        userDefaults.$currentLanguage
+            .sink { [weak self] _ in
+                self?.updateLabels()
+            }
+            .store(in: &cancellables)
     }
     
     // MARK: - Methods
+    private func updateLabels() {
+        screenTitle = "prod".localized
+        subTitle = "all_products".localized
+    }
+    
     func loadProducts() {
         // Reset pagination for fresh start
         currentPage = 0
@@ -146,14 +158,11 @@ class ProductsViewModel: ProductListProtocol {
     // MARK: - ProductListProtocol Implementation
     func toggleFavorite(at index: Int) {
         var product = product(at: index)
-        print("🔄 Before toggle: \(product.title) - isFavorite: \(product.isFavorite)")
         product.isFavorite.toggle()
-        print("🔄 After toggle: \(product.title) - isFavorite: \(product.isFavorite)")
         
         // Update the product in the array by ID
         if let productIndex = products.firstIndex(where: { $0.id == product.id }) {
             products[productIndex] = product
-            print("✅ Updated product in array at index: \(productIndex)")
         }
         
         // Save to Core Data

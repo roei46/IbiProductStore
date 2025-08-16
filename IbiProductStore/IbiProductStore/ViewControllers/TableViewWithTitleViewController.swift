@@ -36,6 +36,7 @@ class TableViewWithTitleViewController: UIViewController {
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
+
         setupUI()
         setupTableView()
         setupBindings()
@@ -49,7 +50,19 @@ class TableViewWithTitleViewController: UIViewController {
     
     // MARK: - Setup Methods
     private func setupUI() {
-        titleLabel.text = viewModel.screenTitle
+        // Bind titleLabel
+        viewModel.screenTitlePublisher
+            .receive(on: DispatchQueue.main)
+            .map { $0 as String? }
+            .assign(to: \.text, on: titleLabel)
+            .store(in: &cancellables)
+        
+        // Bind navigation title
+        viewModel.screenSubTitlePublisher
+            .receive(on: DispatchQueue.main)
+            .map { $0 as String? }
+            .assign(to: \.title, on: self)
+            .store(in: &cancellables)
         
         if viewModel.canEdit() {
             let resetButton = UIButton(type: .system)

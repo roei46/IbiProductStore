@@ -13,7 +13,8 @@ class FavoritesViewModel: ProductListProtocol {
     // MARK: - Properties
     private let localStorageService: LocalStorageServiceProtocol
     private var cancellables = Set<AnyCancellable>()
-    
+    private let userDefaults = UserDefaultsService.shared
+
     // MARK: - Published Properties
     @Published var cellViewModels: [ProductCellViewModel] = []
     @Published var isLoading = false
@@ -42,10 +43,12 @@ class FavoritesViewModel: ProductListProtocol {
     var errorMessagePublisher: Published<String?>.Publisher { $errorMessage }
     
     // MARK: - Computed Properties
-    var screenTitle: String {
-        return "Favorites"
-    }
-    
+    @Published var screenTitle: String = "fav".localized
+    @Published var subTitle: String = "all_products".localized
+
+    var screenTitlePublisher: Published<String>.Publisher { $screenTitle }
+    var screenSubTitlePublisher: Published<String>.Publisher { $subTitle }
+
     // MARK: - Initialization
     init(localStorageService: LocalStorageServiceProtocol = CoreDataStorageService.shared) {
         self.localStorageService = localStorageService
@@ -55,7 +58,11 @@ class FavoritesViewModel: ProductListProtocol {
     
     // MARK: - Setup
     private func setupBindings() {
-        // No need for NotificationCenter - will reload in viewWillAppear
+        userDefaults.$currentLanguage
+            .sink { [weak self] _ in
+                self?.updateLabels()
+            }
+            .store(in: &cancellables)
     }
     
     // MARK: - ProductListProtocol Implementation
@@ -68,6 +75,11 @@ class FavoritesViewModel: ProductListProtocol {
         createCellViewModels(from: favorites)
         
         isLoading = false
+    }
+    
+    private func updateLabels() {
+        screenTitle = "all_fav".localized
+        subTitle = "fav".localized
     }
     
     func navigateToDetail(at index: Int) {
