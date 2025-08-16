@@ -104,8 +104,13 @@ class TableViewWithTitleViewController: UIViewController {
         // Observe cell view models changes
         viewModel.cellViewModelsPublisher
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
+            .sink { [weak self] cellViewModels in
                 self?.tableView.reloadData()
+                if cellViewModels.isEmpty && !(self?.viewModel.isLoading ?? false) {
+                    self?.tableView.showEmptyState(title: "no_products".localized, subtitle: "try_adding_products".localized, imageName: "tray")
+                } else {
+                    self?.tableView.hideEmptyState()
+                }
             }
             .store(in: &cancellables)
         
@@ -115,6 +120,10 @@ class TableViewWithTitleViewController: UIViewController {
             .sink { [weak self] isLoading in
                 if !isLoading {
                     self?.refreshControl.endRefreshing()
+                    self?.tableView.hideLoading()
+                } else if self?.viewModel.cellViewModels.isEmpty == true {
+                    // Show loading only when no products are displayed
+                    self?.tableView.showLoading()
                 }
             }
             .store(in: &cancellables)

@@ -90,6 +90,7 @@ class ProductsViewModel: ProductListProtocol {
     
     func loadProducts() {
         // Reset pagination for fresh start
+        
         currentPage = 0
         originalProducts = []
         loadProductsPage()
@@ -124,7 +125,9 @@ class ProductsViewModel: ProductListProtocol {
                     }
                     
                     // Check if we have more pages
-                    self.hasMorePages = self.originalProducts.count < self.totalProducts
+                    let actualServerProductCount = self.originalProducts.count
+                    let totalServerProducts = self.totalProducts
+                    self.hasMorePages = actualServerProductCount < totalServerProducts
                     
                     self.applyLocalChanges(to: self.originalProducts)
                     self.isLoading = false
