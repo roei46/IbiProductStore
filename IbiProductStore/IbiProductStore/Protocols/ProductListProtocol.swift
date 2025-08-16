@@ -74,4 +74,3 @@ extension ProductListProtocol {
     func canEdit() -> Bool { return false }
     func loadMoreProducts() { }
 }
-// TODO: - DO FROM SCRATCH IN SWIFTUI

@@ -106,5 +106,3 @@ class ProductTableViewCell: UITableViewCell {
         return viewModel?.getProduct()
     }
 }
-
-// SDWebImage handles caching automatically
