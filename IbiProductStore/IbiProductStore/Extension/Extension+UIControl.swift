@@ -31,9 +31,11 @@ struct UIControlPublisher: Publisher {
 final class UIControlSubscription<S: Subscriber>: Subscription where S.Input == UIControl, S.Failure == Never {
     private var subscriber: S?
     private let control: UIControl
+    private let event: UIControl.Event
     
     init(control: UIControl, event: UIControl.Event, subscriber: S) {
         self.control = control
+        self.event = event
         self.subscriber = subscriber
         control.addTarget(self, action: #selector(eventHandler), for: event)
     }
@@ -41,6 +43,7 @@ final class UIControlSubscription<S: Subscriber>: Subscription where S.Input == 
     func request(_ demand: Subscribers.Demand) {}
     
     func cancel() {
+        control.removeTarget(self, action: #selector(eventHandler), for: event)
         subscriber = nil
     }
     

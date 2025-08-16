@@ -13,26 +13,13 @@ final class CoreDataStorageService: LocalStorageServiceProtocol {
     
     // MARK: - Properties
     private let coreDataStack: CoreDataStack
-    private let encryptionKey: SymmetricKey
+    private let encryptionService = EncryptionService()
     
     // MARK: - Initialization
     init(coreDataStack: CoreDataStack) {
         self.coreDataStack = coreDataStack
-        self.encryptionKey = Self.getOrCreateEncryptionKey()
     }
     
-    // MARK: - Encryption Key Management
-    private static func getOrCreateEncryptionKey() -> SymmetricKey {
-        let keyKey = "CoreDataEncryptionKey"
-        
-        if let existingKeyData = UserDefaults.standard.data(forKey: keyKey) {
-            return SymmetricKey(data: existingKeyData)
-        } else {
-            let newKey = SymmetricKey(size: .bits256)
-            UserDefaults.standard.set(newKey.withUnsafeBytes { Data($0) }, forKey: keyKey)
-            return newKey
-        }
-    }
     
     // MARK: - Favorites Management
     
@@ -41,7 +28,7 @@ final class CoreDataStorageService: LocalStorageServiceProtocol {
         
         do {
             let cdProducts = try CDProduct.fetchFavorites(context: context)
-            return cdProducts.map { decryptSensitiveFields($0) }
+            return cdProducts.map { encryptionService.decryptSensitiveFields($0) }
         } catch {
             print("Error loading favorites: \(error)")
             return []
@@ -68,7 +55,7 @@ final class CoreDataStorageService: LocalStorageServiceProtocol {
                 } else {
                     // Create new product (shouldn't happen for modifications)
                     let cdProduct = product.toCoreData(context: context)
-                    encryptSensitiveFields(cdProduct, from: product)
+                    encryptionService.encryptSensitiveFields(cdProduct, from: product)
                     cdProduct.isLocallyModified = true
                 }
             }
@@ -84,7 +71,7 @@ final class CoreDataStorageService: LocalStorageServiceProtocol {
         
         do {
             let cdProducts = try CDProduct.fetchModified(context: context)
-            return cdProducts.map { decryptSensitiveFields($0) }
+            return cdProducts.map { encryptionService.decryptSensitiveFields($0) }
         } catch {
             print("Error loading modified products: \(error)")
             return []
@@ -105,7 +92,7 @@ final class CoreDataStorageService: LocalStorageServiceProtocol {
             // Add new locally added products
             for product in products {
                 let cdProduct = product.toCoreData(context: context)
-                encryptSensitiveFields(cdProduct, from: product)
+                encryptionService.encryptSensitiveFields(cdProduct, from: product)
                 cdProduct.isLocallyAdded = true
             }
             
@@ -120,7 +107,7 @@ final class CoreDataStorageService: LocalStorageServiceProtocol {
         
         do {
             let cdProducts = try CDProduct.fetchAdded(context: context)
-            return cdProducts.map { decryptSensitiveFields($0) }
+            return cdProducts.map { encryptionService.decryptSensitiveFields($0) }
         } catch {
             print("Error loading added products: \(error)")
             return []
@@ -205,7 +192,7 @@ final class CoreDataStorageService: LocalStorageServiceProtocol {
                 existingProduct.isFavorite = true
             } else {
                 let cdProduct = product.toCoreData(context: context)
-                encryptSensitiveFields(cdProduct, from: product)
+                encryptionService.encryptSensitiveFields(cdProduct, from: product)
                 cdProduct.isFavorite = true
             }
             
@@ -230,7 +217,6 @@ final class CoreDataStorageService: LocalStorageServiceProtocol {
     }
     
     func toggleFavorite(_ product: Product) {
-        // Product.isFavorite already reflects the desired state
         if product.isFavorite {
             addToFavorites(product)
         } else {
@@ -291,89 +277,5 @@ final class CoreDataStorageService: LocalStorageServiceProtocol {
             cdReview.reviewerEmail = review.reviewerEmail
             cdReview.product = cdProduct
         }
-    }
-    
-    // MARK: - Encryption Helper Methods
-    private func encryptSensitiveFields(_ cdProduct: CDProduct, from product: Product) {
-        // Skip if already encrypted
-        if cdProduct.encryptedIDCipher != nil && cdProduct.encryptedSKUCipher != nil {
-            return
-        }
-        
-        do {
-            // Encrypt product ID
-            let productIdString = String(product.id)
-            guard !productIdString.isEmpty else {
-                print("⚠️ Product ID is empty, skipping encryption")
-                return
-            }
-            
-            let (idCipher, idNonce) = try EncryptionHelper.encrypt(productIdString, using: encryptionKey)
-            cdProduct.encryptedIDCipher = idCipher
-            cdProduct.encryptedIDNonce = idNonce
-            
-            // Encrypt SKU
-            let skuValue = product.sku
-            guard !skuValue.isEmpty else {
-                print("⚠️ SKU value is empty, skipping encryption")
-                return
-            }
-            
-            let (skuCipher, skuNonce) = try EncryptionHelper.encrypt(skuValue, using: encryptionKey)
-            cdProduct.encryptedSKUCipher = skuCipher
-            cdProduct.encryptedSKUNonce = skuNonce
-            
-        } catch {
-            print("❌ Encryption failed: \(error)")
-            // Don't rethrow - allow the save to continue without encryption
-        }
-    }
-    
-    private func decryptSensitiveFields(_ cdProduct: CDProduct) -> Product {
-        var product = cdProduct.toProduct() // Start with base product
-        
-        // Try to decrypt if encrypted fields exist
-        if let idCipher = cdProduct.encryptedIDCipher,
-           let idNonce = cdProduct.encryptedIDNonce,
-           let skuCipher = cdProduct.encryptedSKUCipher,
-           let skuNonce = cdProduct.encryptedSKUNonce {
-            do {
-                let decryptedID = try EncryptionHelper.decrypt(cipher: idCipher, nonceData: idNonce, using: encryptionKey)
-                let decryptedSKU = try EncryptionHelper.decrypt(cipher: skuCipher, nonceData: skuNonce, using: encryptionKey)
-                
-                // Create new product with decrypted values
-                var newProduct = Product(
-                    id: Int(decryptedID) ?? product.id,
-                    title: product.title,
-                    description: product.description,
-                    category: product.category,
-                    price: product.price,
-                    discountPercentage: product.discountPercentage,
-                    rating: product.rating,
-                    stock: product.stock,
-                    tags: product.tags,
-                    brand: product.brand,
-                    sku: decryptedSKU,
-                    weight: product.weight,
-                    dimensions: product.dimensions,
-                    warrantyInformation: product.warrantyInformation,
-                    shippingInformation: product.shippingInformation,
-                    availabilityStatus: product.availabilityStatus,
-                    reviews: product.reviews,
-                    returnPolicy: product.returnPolicy,
-                    minimumOrderQuantity: product.minimumOrderQuantity,
-                    meta: product.meta,
-                    images: product.images,
-                    thumbnail: product.thumbnail
-                )
-                newProduct.isFavorite = product.isFavorite
-                product = newProduct
-            } catch {
-                print("Decryption failed: \(error)")
-                // Return product with plain values (already loaded)
-            }
-        }
-        
-        return product
     }
 }

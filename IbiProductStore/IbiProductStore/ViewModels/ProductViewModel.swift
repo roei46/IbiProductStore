@@ -205,7 +205,6 @@ class ProductsViewModel: ProductListProtocol {
     // Override to prevent unnecessary reloads on products screen
     func refreshOnAppear() {
         if products.isEmpty {
-            // Load from server if no products
             loadProducts()
         } else {
             // Refresh local changes (favorites, modifications) when returning to screen

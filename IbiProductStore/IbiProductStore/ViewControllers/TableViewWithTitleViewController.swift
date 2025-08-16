@@ -40,7 +40,6 @@ class TableViewWithTitleViewController: UIViewController {
         setupUI()
         setupTableView()
         setupBindings()
-        loadInitialData()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -122,9 +121,6 @@ class TableViewWithTitleViewController: UIViewController {
 
     }
     
-    private func loadInitialData() {
-        viewModel.loadProducts()
-    }
     
     // MARK: - Actions
     @objc private func refreshProducts() {

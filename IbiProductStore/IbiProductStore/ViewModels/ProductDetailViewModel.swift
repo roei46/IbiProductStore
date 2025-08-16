@@ -69,35 +69,21 @@ class ProductDetailViewModel: DetailsProtocol, ObservableObject {
             self.editableDescription = product.description
             self.editablePrice = product.formattedPrice
         case .add:
+            // Placeholder product - real product created in saveChanges
             self.product = Product(
-                id: Int.random(in: 10000...99999),
-                title: "",
-                description: "",
-                category: "",
-                price: 0,
-                discountPercentage: 0,
-                rating: 0,
-                stock: 0,
-                tags: [],
-                brand: "",
-                sku: "SKU-\(Int.random(in: 10000...99999))",
-                weight: 0,
-                dimensions: Dimensions(width: 0, height: 0, depth: 0),
-                warrantyInformation: "",
-                shippingInformation: "",
-                availabilityStatus: "In Stock",
-                reviews: [],
-                returnPolicy: "",
-                minimumOrderQuantity: 1,
+                id: 0, title: "", description: "", category: "", price: 0,
+                discountPercentage: 0, rating: 0, stock: 0, tags: [], brand: "",
+                sku: "", weight: 0, dimensions: Dimensions(width: 0, height: 0, depth: 0),
+                warrantyInformation: "", shippingInformation: "", availabilityStatus: "",
+                reviews: [], returnPolicy: "", minimumOrderQuantity: 0,
                 meta: Meta(createdAt: "", updatedAt: "", barcode: "", qrCode: ""),
-                images: [],
-                thumbnail: ""
+                images: [], thumbnail: ""
             )
             self.isFavorite = false
             self.editableTitle = ""
             self.editableDescription = ""
             self.editablePrice = "0.00"
-            self.isEditing = true // Start in edit mode for add
+            self.isEditing = true
         }
     }
     
