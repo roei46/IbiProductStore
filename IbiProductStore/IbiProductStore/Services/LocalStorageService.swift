@@ -9,14 +9,14 @@ import Foundation
 import CryptoKit
 
 protocol LocalStorageServiceProtocol {
-    func loadFavorites() -> [Product]
-    func saveModifiedProducts(_ products: [Product])
-    func loadModifiedProducts() -> [Product]
-    func saveAddedProducts(_ products: [Product])
-    func loadAddedProducts() -> [Product]
-    func saveDeletedProductIds(_ ids: [Int])
-    func loadDeletedProductIds() -> [Int]
-    func clearAllLocalData()
+    func loadFavorites() throws -> [Product]
+    func saveModifiedProducts(_ products: [Product]) throws
+    func loadModifiedProducts() throws -> [Product]
+    func saveAddedProducts(_ products: [Product]) throws
+    func loadAddedProducts() throws -> [Product]
+    func saveDeletedProductIds(_ ids: [Int]) throws
+    func loadDeletedProductIds() throws -> [Int]
+    func clearAllLocalData() throws
     
     // Favorites helper methods
     func isFavorite(_ product: Product) -> Bool

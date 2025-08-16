@@ -70,9 +70,13 @@ class FavoritesViewModel: ProductListProtocol {
         isLoading = true
         errorMessage = nil
         
-        // Load favorites from local storage
-        let favorites = localStorageService.loadFavorites()
-        createCellViewModels(from: favorites)
+        do {
+            // Load favorites from local storage
+            let favorites = try localStorageService.loadFavorites()
+            createCellViewModels(from: favorites)
+        } catch {
+            self.errorMessage = error.localizedDescription
+        }
         
         isLoading = false
     }
@@ -80,6 +84,25 @@ class FavoritesViewModel: ProductListProtocol {
     private func updateLabels() {
         screenTitle = "all_fav".localized
         subTitle = "fav".localized
+    }
+    
+    func deleteProduct(at index: Int) {
+        let product = product(at: index)
+        
+        do {
+            // Remove from favorites
+            localStorageService.removeFromFavorites(product)
+            
+            // Add to deleted IDs
+            var deletedIds = try localStorageService.loadDeletedProductIds()
+            deletedIds.append(product.id)
+            try localStorageService.saveDeletedProductIds(deletedIds)
+            
+            // Remove from current list
+            cellViewModels.remove(at: index)
+        } catch {
+            self.errorMessage = error.localizedDescription
+        }
     }
     
     func navigateToDetail(at index: Int) {

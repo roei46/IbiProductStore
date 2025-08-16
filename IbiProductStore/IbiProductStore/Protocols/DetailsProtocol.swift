@@ -30,6 +30,7 @@ protocol DetailsProtocol: ObservableObject {
     var editableTitlePublisher: AnyPublisher<String, Never> { get }
     var editablePricePublisher: AnyPublisher<String, Never> { get }
     var editableDescriptionPublisher: AnyPublisher<String, Never> { get }
+    var errorMessagePublisher: AnyPublisher<String, Never> { get }
     
     // Triggers (like LoginViewModel pattern)
     var closeTrigger: PassthroughSubject<Void, Never> { get }

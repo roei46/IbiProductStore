@@ -23,20 +23,19 @@ final class CoreDataStorageService: LocalStorageServiceProtocol {
     
     // MARK: - Favorites Management
     
-    func loadFavorites() -> [Product] {
+    func loadFavorites() throws -> [Product] {
         let context = coreDataStack.context
         
         do {
             let cdProducts = try CDProduct.fetchFavorites(context: context)
             return cdProducts.map { encryptionService.decryptSensitiveFields($0) }
         } catch {
-            print("Error loading favorites: \(error)")
-            return []
+            throw CoreDataError("Failed to load favorites", underlyingError: error)
         }
     }
     
     // MARK: - Modified Products
-    func saveModifiedProducts(_ products: [Product]) {
+    func saveModifiedProducts(_ products: [Product]) throws {
         let context = coreDataStack.context
         
         do {
@@ -62,24 +61,23 @@ final class CoreDataStorageService: LocalStorageServiceProtocol {
             
             coreDataStack.save()
         } catch {
-            print("Error saving modified products: \(error)")
+            throw CoreDataError("Failed to save modified products", underlyingError: error)
         }
     }
     
-    func loadModifiedProducts() -> [Product] {
+    func loadModifiedProducts() throws -> [Product] {
         let context = coreDataStack.context
         
         do {
             let cdProducts = try CDProduct.fetchModified(context: context)
             return cdProducts.map { encryptionService.decryptSensitiveFields($0) }
         } catch {
-            print("Error loading modified products: \(error)")
-            return []
+            throw CoreDataError("Failed to load modified products", underlyingError: error)
         }
     }
     
     // MARK: - Added Products
-    func saveAddedProducts(_ products: [Product]) {
+    func saveAddedProducts(_ products: [Product]) throws {
         let context = coreDataStack.context
         
         do {
@@ -98,24 +96,23 @@ final class CoreDataStorageService: LocalStorageServiceProtocol {
             
             coreDataStack.save()
         } catch {
-            print("Error saving added products: \(error)")
+            throw CoreDataError("Failed to save added products", underlyingError: error)
         }
     }
     
-    func loadAddedProducts() -> [Product] {
+    func loadAddedProducts() throws -> [Product] {
         let context = coreDataStack.context
         
         do {
             let cdProducts = try CDProduct.fetchAdded(context: context)
             return cdProducts.map { encryptionService.decryptSensitiveFields($0) }
         } catch {
-            print("Error loading added products: \(error)")
-            return []
+            throw CoreDataError("Failed to load added products", underlyingError: error)
         }
     }
     
     // MARK: - Deleted Product IDs
-    func saveDeletedProductIds(_ ids: [Int]) {
+    func saveDeletedProductIds(_ ids: [Int]) throws {
         let context = coreDataStack.context
         
         do {
@@ -133,32 +130,28 @@ final class CoreDataStorageService: LocalStorageServiceProtocol {
             
             coreDataStack.save()
         } catch {
-            print("Error saving deleted product IDs: \(error)")
+            throw CoreDataError("Failed to save deleted product IDs", underlyingError: error)
         }
     }
     
-    func loadDeletedProductIds() -> [Int] {
+    func loadDeletedProductIds() throws -> [Int] {
         let context = coreDataStack.context
         
         do {
             return try CDProduct.fetchDeletedIds(context: context)
         } catch {
-            print("Error loading deleted product IDs: \(error)")
-            return []
+            throw CoreDataError("Failed to load deleted product IDs", underlyingError: error)
         }
     }
     
     // MARK: - Clear Data
-    func clearAllLocalData() {
+    func clearAllLocalData() throws {
         let context = coreDataStack.context
         
         do {
             // Reset all local flags instead of deleting everything
             let request: NSFetchRequest<CDProduct> = CDProduct.fetchRequest()
             let allProducts = try context.fetch(request)
-            // TODO: - WHY ONE BY ONE?
-            // TODO: - NEED EVERY THING HER?
-            // TODO: - Make not singltone
 
             for product in allProducts {
                 if product.isLocallyAdded {
@@ -174,7 +167,7 @@ final class CoreDataStorageService: LocalStorageServiceProtocol {
             
             coreDataStack.save()
         } catch {
-            print("Error clearing local data: \(error)")
+            throw CoreDataError("Failed to clear local data", underlyingError: error)
         }
     }
     

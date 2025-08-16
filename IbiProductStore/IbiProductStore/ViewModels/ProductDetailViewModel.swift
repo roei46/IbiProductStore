@@ -19,6 +19,7 @@ class ProductDetailViewModel: DetailsProtocol, ObservableObject {
     // MARK: - Published Properties
     @Published private(set) var isFavorite: Bool = false
     @Published var isEditing: Bool = false
+    @Published var errorMessage: String?
     
     // MARK: - Editable Properties
     @Published var editableTitle: String = ""
@@ -52,6 +53,7 @@ class ProductDetailViewModel: DetailsProtocol, ObservableObject {
     var editableTitlePublisher: AnyPublisher<String, Never> { $editableTitle.eraseToAnyPublisher() }
     var editablePricePublisher: AnyPublisher<String, Never> { $editablePrice.eraseToAnyPublisher() }
     var editableDescriptionPublisher: AnyPublisher<String, Never> { $editableDescription.eraseToAnyPublisher() }
+    var errorMessagePublisher: AnyPublisher<String, Never> { $errorMessage.compactMap { $0 }.eraseToAnyPublisher() }
     
     // MARK: - Triggers (like LoginViewModel pattern)
     let closeTrigger = PassthroughSubject<Void, Never>()
@@ -141,7 +143,11 @@ class ProductDetailViewModel: DetailsProtocol, ObservableObject {
             self.product = updatedProduct
             
             // Save to local storage as modified
-            localStorageService.saveModifiedProducts([updatedProduct])
+            do {
+                try localStorageService.saveModifiedProducts([updatedProduct])
+            } catch {
+                self.errorMessage = error.localizedDescription
+            }
             
             // Exit edit mode
             isEditing = false
@@ -177,9 +183,13 @@ class ProductDetailViewModel: DetailsProtocol, ObservableObject {
             self.product = newProduct
             
             // Save new product to local storage
-            var addedProducts = localStorageService.loadAddedProducts()
-            addedProducts.append(newProduct)
-            localStorageService.saveAddedProducts(addedProducts)
+            do {
+                var addedProducts = try localStorageService.loadAddedProducts()
+                addedProducts.append(newProduct)
+                try localStorageService.saveAddedProducts(addedProducts)
+            } catch {
+                self.errorMessage = error.localizedDescription
+            }
             
             // Close the detail view after adding
             closeTrigger.send()

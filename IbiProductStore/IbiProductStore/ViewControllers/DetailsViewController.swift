@@ -59,6 +59,12 @@ class DetailsViewController: UIViewController {
         closeButton.tintColor = .label
         navigationItem.leftBarButtonItem = UIBarButtonItem(customView: closeButton)
         
+        // Add Done button to text fields
+        titleTextField.returnKeyType = .done
+        priceTextField.returnKeyType = .done
+        titleTextField.delegate = self
+        priceTextField.delegate = self
+        
         // Initialize button states (not editing initially)
         editButton.isHidden = false
         saveButton.isHidden = true
@@ -289,6 +295,14 @@ class DetailsViewController: UIViewController {
             // Dismiss keyboard
             view.endEditing(true)
         }
+    }
+}
+
+// MARK: - UITextFieldDelegate
+extension DetailsViewController: UITextFieldDelegate {
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.resignFirstResponder()
+        return true
     }
 }
 
