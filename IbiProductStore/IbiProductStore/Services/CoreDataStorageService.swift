@@ -110,6 +110,38 @@ final class CoreDataStorageService: LocalStorageServiceProtocol {
         }
     }
     
+    // MARK: - Deleted Product IDs
+    func saveDeletedProductIds(_ ids: [Int]) throws {
+        let context = coreDataStack.context
+        
+        do {
+            for id in ids {
+                if let existingProduct = try CDProduct.findByID(id, context: context) {
+                    existingProduct.isLocallyDeleted = true
+                } else {
+                    // Create a minimal product record just to track deletion
+                    let cdProduct = CDProduct(context: context)
+                    cdProduct.id = Int32(id)
+                    cdProduct.isLocallyDeleted = true
+                    cdProduct.title = "Deleted Product"
+                }
+            }
+            
+            coreDataStack.save()
+        } catch {
+            throw CoreDataError("Failed to save deleted product IDs", underlyingError: error)
+        }
+    }
+    
+    func loadDeletedProductIds() throws -> [Int] {
+        let context = coreDataStack.context
+        
+        do {
+            return try CDProduct.fetchDeletedIds(context: context)
+        } catch {
+            throw CoreDataError("Failed to load deleted product IDs", underlyingError: error)
+        }
+    }
     
     // MARK: - Clear Data
     func clearAllLocalData() throws {

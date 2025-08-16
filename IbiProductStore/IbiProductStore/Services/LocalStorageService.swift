@@ -14,6 +14,8 @@ protocol LocalStorageServiceProtocol {
     func loadModifiedProducts() throws -> [Product]
     func saveAddedProducts(_ products: [Product]) throws
     func loadAddedProducts() throws -> [Product]
+    func saveDeletedProductIds(_ ids: [Int]) throws
+    func loadDeletedProductIds() throws -> [Int]
     func clearAllLocalData() throws
     
     // Favorites helper methods
