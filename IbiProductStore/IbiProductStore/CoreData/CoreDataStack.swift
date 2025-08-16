@@ -17,26 +17,73 @@ final class CoreDataStack {
     // MARK: - Core Data Stack
     lazy var persistentContainer: NSPersistentContainer = {
         let container = NSPersistentContainer(name: "IbiProductStore")
+        guard let description = container.persistentStoreDescriptions.first else {
+              print("Warning: No persistent store descriptions found.")
+              return container
+          }
         
-        // Configure for encryption at file system level
-        let description = container.persistentStoreDescriptions.first
-        description?.setOption(FileProtectionType.complete as NSObject, forKey: NSPersistentStoreFileProtectionKey)
+        // נתיב ל-SQLite
         
-        // Enable data protection
-        description?.setOption(true as NSNumber, forKey: NSPersistentHistoryTrackingKey)
-        description?.setOption(true as NSNumber, forKey: NSPersistentStoreRemoteChangeNotificationPostOptionKey)
+        guard let storeURL = description.url else { return container }
         
-        container.loadPersistentStores { [weak self] _, error in
+        // Options חובה
+        description.setOption(FileProtectionType.complete as NSObject, forKey: NSPersistentStoreFileProtectionKey)
+        description.setOption(true as NSNumber, forKey: NSPersistentHistoryTrackingKey)
+        description.setOption(true as NSNumber, forKey: NSPersistentStoreRemoteChangeNotificationPostOptionKey)
+        
+        // בדיקה אם ה-store קיים
+        if FileManager.default.fileExists(atPath: storeURL.path) {
+            // אפשרות לשדרג או להתאים את ה-store הקיים
+            description.shouldMigrateStoreAutomatically = true
+            description.shouldInferMappingModelAutomatically = true
+        }
+
+        container.loadPersistentStores { storeDescription, error in
             if let error = error as NSError? {
                 print("Core Data error: \(error), \(error.userInfo)")
+                
+                // אופציונלי: למחוק ולבנות מחדש במקרה של כשל
+                /*
+                try? container.persistentStoreCoordinator.destroyPersistentStore(
+                    at: storeURL,
+                    ofType: NSSQLiteStoreType,
+                    options: nil
+                )
+                container.loadPersistentStores { _, error in
+                    if let error = error {
+                        fatalError("Unrecoverable Core Data error: \(error)")
+                    }
+                }
+                */
             }
         }
         
         container.viewContext.automaticallyMergesChangesFromParent = true
         container.viewContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
-        
         return container
     }()
+//    lazy var persistentContainer: NSPersistentContainer = {
+//        let container = NSPersistentContainer(name: "IbiProductStore")
+//        
+//        // Configure for encryption at file system level
+//        let description = container.persistentStoreDescriptions.first
+//        description?.setOption(FileProtectionType.complete as NSObject, forKey: NSPersistentStoreFileProtectionKey)
+//        
+//        // Enable data protection
+//        description?.setOption(true as NSNumber, forKey: NSPersistentHistoryTrackingKey)
+//        description?.setOption(true as NSNumber, forKey: NSPersistentStoreRemoteChangeNotificationPostOptionKey)
+//        
+//        container.loadPersistentStores { [weak self] _, error in
+//            if let error = error as NSError? {
+//                print("Core Data error: \(error), \(error.userInfo)")
+//            }
+//        }
+//        
+//        container.viewContext.automaticallyMergesChangesFromParent = true
+//        container.viewContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
+//        
+//        return container
+//    }()
     
     var context: NSManagedObjectContext {
         return persistentContainer.viewContext

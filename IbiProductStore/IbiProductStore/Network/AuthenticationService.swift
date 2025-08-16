@@ -9,7 +9,15 @@ import Foundation
 import Combine
 import LocalAuthentication
 
-final class AuthenticationService {
+protocol AuthProtocol {
+    func login(username: String, password: String) -> AnyPublisher<Bool, Never>
+    func authenticateWithBiometrics() -> AnyPublisher<Bool, Never>
+    func logout()
+    func setLoggedIn(_ isLoggedIn: Bool)
+    func isLoggedIn() -> Bool
+}
+
+final class AuthenticationService: AuthProtocol {
     
     private let testUser = User(username: "testuser", password: "password123")
     

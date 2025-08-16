@@ -11,7 +11,7 @@ import Combine
 class LoginViewModel {
     
     // MARK: - Properties
-    private let authService: AuthenticationService
+    private let authService: AuthProtocol
     var cancellables = Set<AnyCancellable>()
     
     // MARK: - Input
@@ -40,7 +40,7 @@ class LoginViewModel {
     
     
     
-    init(with authService: AuthenticationService) {
+    init(with authService: AuthProtocol) {
         self.authService = authService
         
         loginBioTrigger

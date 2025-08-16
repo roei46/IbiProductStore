@@ -13,16 +13,16 @@ final class LoginCoordinator: Coordinator {
     var childCoordinators = [Coordinator]()
     var navigationController: UINavigationController
     private var cancellables = Set<AnyCancellable>()
-    private var authService: AuthenticationService!
+    private var authService: AuthProtocol
     
     private let loginSuccessSubject = PassthroughSubject<Void, Never>()
     var loginSuccessPublisher: AnyPublisher<Void, Never> {
         loginSuccessSubject.eraseToAnyPublisher()
     }
     
-    init(navigationController: UINavigationController) {
+    init(navigationController: UINavigationController, authService: AuthProtocol = AuthenticationService()) {
         self.navigationController = navigationController
-        self.authService =  AuthenticationService()
+        self.authService = authService
     }
     
     func start() {

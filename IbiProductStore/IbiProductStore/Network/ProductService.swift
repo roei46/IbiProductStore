@@ -13,7 +13,7 @@ final class PorductService {
 protocol PorductServiceProtocol {
     var apiClient: NetworkService { get set }
     
-    func getProduct() async throws -> ProductResponse
+//    func getProduct() async throws -> ProductResponse
     func getProducts(limit: Int, skip: Int) async throws -> ProductResponse
 }
 
