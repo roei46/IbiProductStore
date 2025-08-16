@@ -66,8 +66,8 @@ extension UIButton {
             NSLayoutConstraint.activate([
                 loader.centerXAnchor.constraint(equalTo: self.centerXAnchor),
                 loader.centerYAnchor.constraint(equalTo: self.centerYAnchor),
-                loader.heightAnchor.constraint(equalToConstant: 24),
-                loader.widthAnchor.constraint(equalToConstant: 24)
+                loader.heightAnchor.constraint(equalToConstant: 50),
+                loader.widthAnchor.constraint(equalToConstant: 50)
             ])
             
             loader.play()

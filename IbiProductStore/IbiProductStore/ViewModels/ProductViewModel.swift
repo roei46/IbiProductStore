@@ -189,6 +189,15 @@ class ProductsViewModel: ProductListProtocol {
         if localStorageService.isFavorite(product) {
             localStorageService.removeFromFavorites(product)
         }
+        
+        // If it's a locally added product, remove it from added products list
+        do {
+            let addedProducts = try localStorageService.loadAddedProducts()
+            let updatedAddedProducts = addedProducts.filter { $0.id != product.id }
+            try localStorageService.saveAddedProducts(updatedAddedProducts)
+        } catch {
+            self.errorMessage = error.localizedDescription
+        }
     }
     
     func resetToServer() {

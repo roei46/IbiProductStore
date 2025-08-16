@@ -13,4 +13,6 @@
 "settings" = "Settings";
 "fav" = "Favorites";
 "prod" = "Products";
+"login" = "Login";
+"biometric" = "Face ID / Touch ID";
 

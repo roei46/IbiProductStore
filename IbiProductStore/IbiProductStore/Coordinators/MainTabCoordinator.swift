@@ -14,15 +14,16 @@ final class MainTabCoordinator: Coordinator {
     var navigationController: UINavigationController
     private var coreDataStack: CoreDataStack
     private var storageService: LocalStorageServiceProtocol
+    private var cancellables = Set<AnyCancellable>()
     
     private let logoutSubject = PassthroughSubject<Void, Never>()
     var logoutPublisher: AnyPublisher<Void, Never> {
         logoutSubject.eraseToAnyPublisher()
     }
     
-    init(navigationController: UINavigationController) {
+    init(navigationController: UINavigationController, coreDataStack: CoreDataStack) {
         self.navigationController = navigationController
-        self.coreDataStack = CoreDataStack()
+        self.coreDataStack = coreDataStack
         self.storageService = CoreDataStorageService(coreDataStack: coreDataStack)
     }
     
@@ -35,7 +36,7 @@ final class MainTabCoordinator: Coordinator {
         childCoordinators.append(productsCoordinator)
         productsCoordinator.start()
         productsNav.tabBarItem = UITabBarItem(
-            title: "Products",
+            title: "prod".localized,
             image: UIImage(systemName: "list.bullet"),
             tag: 0
         )
@@ -46,7 +47,7 @@ final class MainTabCoordinator: Coordinator {
         childCoordinators.append(favoritesCoordinator)
         favoritesCoordinator.start()
         favoritesNav.tabBarItem = UITabBarItem(
-            title: "Favorites",
+            title: "fav".localized,
             image: UIImage(systemName: "heart"),
             tag: 1
         )
@@ -64,12 +65,22 @@ final class MainTabCoordinator: Coordinator {
 
         settingsCoordinator.start()
         settingsNav.tabBarItem = UITabBarItem(
-            title: "Settings",
+            title: "settings".localized,
             image: UIImage(systemName: "gear"),
             tag: 2
         )
         
         tabBarController.viewControllers = [productsNav, favoritesNav, settingsNav]
         navigationController.setViewControllers([tabBarController], animated: true)
+        
+        // Update tab titles when language changes
+        UserDefaultsService.shared.$currentLanguage
+            .receive(on: DispatchQueue.main)
+            .sink { _ in
+                productsNav.tabBarItem.title = "prod".localized
+                favoritesNav.tabBarItem.title = "fav".localized
+                settingsNav.tabBarItem.title = "settings".localized
+            }
+            .store(in: &cancellables)
     }
 }

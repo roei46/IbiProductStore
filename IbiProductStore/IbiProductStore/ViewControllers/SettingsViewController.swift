@@ -31,6 +31,17 @@ final class SettingsViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        // Set initial title
+        title = "settings".localized
+        
+        // Update title when language changes
+        UserDefaultsService.shared.$currentLanguage
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.title = "settings".localized
+            }
+            .store(in: &cancellables)
+        
         // Bind labels to ViewModel published properties
         viewModel.$label
             .receive(on: DispatchQueue.main)

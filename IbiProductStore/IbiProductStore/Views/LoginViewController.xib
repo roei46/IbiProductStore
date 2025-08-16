@@ -61,13 +61,16 @@
                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="9aP-hM-GbN">
                     <rect key="frame" x="146.66666666666666" y="378" width="100" height="50"/>
                     <constraints>
-                        <constraint firstAttribute="width" constant="100" id="8gH-dM-fNu"/>
+                        <constraint firstAttribute="width" constant="200" id="8gH-dM-fNu"/>
                         <constraint firstAttribute="height" constant="50" id="Aeg-gk-OWU"/>
                     </constraints>
                     <state key="normal" title="FaceID"/>
-                    <buttonConfiguration key="configuration" style="plain" title="FaceID">
-                        <fontDescription key="titleFontDescription" type="system" weight="medium" pointSize="16"/>
-                        <color key="baseForegroundColor" systemColor="systemBlueColor"/>
+                    <buttonConfiguration key="configuration" style="filled" image="faceid" catalog="system" imagePlacement="leading" title="FaceID" imagePadding="8">
+                        <backgroundConfiguration key="background">
+                            <color key="backgroundColor" systemColor="systemGreenColor"/>
+                        </backgroundConfiguration>
+                        <fontDescription key="titleFontDescription" type="system" weight="semibold" pointSize="16"/>
+                        <color key="baseForegroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                     </buttonConfiguration>
                 </button>
             </subviews>
@@ -85,11 +88,15 @@
         </view>
     </objects>
     <resources>
+        <image name="faceid" catalog="system" width="128" height="115"/>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
         <systemColor name="systemBlueColor">
-            <color red="0.0" green="0.47843137254901963" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </systemColor>
+        <systemColor name="systemGreenColor">
+            <color red="0.20392156859999999" green="0.78039215689999997" blue="0.34901960780000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
     </resources>
 </document>

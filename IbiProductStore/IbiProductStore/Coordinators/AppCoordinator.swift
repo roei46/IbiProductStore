@@ -13,6 +13,7 @@ final class AppCoordinator: Coordinator {
     var childCoordinators = [Coordinator]()
     var navigationController: UINavigationController
     private var cancellables = Set<AnyCancellable>()
+    private let coreDataStack = CoreDataStack()
     
     init(navigationController: UINavigationController) {
         self.navigationController = navigationController
@@ -37,7 +38,7 @@ final class AppCoordinator: Coordinator {
     }
     
     private func showMainApp() {
-        let mainCoordinator = MainTabCoordinator(navigationController: navigationController)
+        let mainCoordinator = MainTabCoordinator(navigationController: navigationController, coreDataStack: coreDataStack)
         childCoordinators.append(mainCoordinator)
         
         mainCoordinator.logoutPublisher

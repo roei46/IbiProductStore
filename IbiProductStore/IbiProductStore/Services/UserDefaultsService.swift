@@ -12,7 +12,7 @@ final class UserDefaultsService: ObservableObject {
     
     static let shared = UserDefaultsService()
     
-    @Published var currentLanguage: String = "en"
+    @Published var currentLanguage: String
     
     private init() {
         currentLanguage = UserDefaults.standard.string(forKey: Keys.language) ?? "en"

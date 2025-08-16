@@ -30,6 +30,19 @@ class LoginViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        // Set button titles
+        loginButton.setTitle("login".localized, for: .normal)
+        biometricButton.setTitle("biometric".localized, for: .normal)
+        
+        // Update button titles when language changes
+        UserDefaultsService.shared.$currentLanguage
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.loginButton.setTitle("login".localized, for: .normal)
+                self?.biometricButton.setTitle("biometric".localized, for: .normal)
+            }
+            .store(in: &cancellables)
+        
         userTextField.textPublisher
             .compactMap { $0 }
             .assign(to: \.username, on: viewModel)

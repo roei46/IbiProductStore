@@ -31,9 +31,10 @@ final class SettingsViewModel: SettingsType{
     var logOutTrigger = PassthroughSubject<Void, Never>()
 
     init () {
-        // Load saved preferences
         isFirstSwitchOn = userDefaults.isDarkMode
         isSecondSwitchOn = userDefaults.selectedLanguage == "he"
+        
+        updateLabels()
         
         $isFirstSwitchOn
             .sink { [weak self] on in
