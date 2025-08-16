@@ -9,7 +9,7 @@ import Foundation
 import UIKit
 import Combine
 
-class FavoritesCoordinator: Coordinator {
+final class FavoritesCoordinator: Coordinator {
     var childCoordinators = [Coordinator]()
     var navigationController: UINavigationController
     private var cancellables = Set<AnyCancellable>()

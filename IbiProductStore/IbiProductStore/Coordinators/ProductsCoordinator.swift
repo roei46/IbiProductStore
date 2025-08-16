@@ -9,7 +9,7 @@ import Foundation
 import UIKit
 import Combine
 
-class ProductsCoordinator: Coordinator {
+final class ProductsCoordinator: Coordinator {
     var childCoordinators = [Coordinator]()
     var navigationController: UINavigationController
     private var cancellables = Set<AnyCancellable>()
