@@ -8,7 +8,18 @@
 import Foundation
 import Combine
 
-class LoginViewModel {
+protocol LoginProtocolType: ObservableObject {
+    var username: String { get set }
+    var password: String { get set }
+    var errorMessage: String? { get set }
+    var loginTrigger: PassthroughSubject<Void, Never> { get }
+    var loginBioTrigger: PassthroughSubject<Void, Never> { get }
+    var loginSuccessPublisher: AnyPublisher<Void, Never> { get }
+    var isLoginButtonEnabled: AnyPublisher<Bool, Never> { get }
+    var isLoadingPublisher: Published<Bool>.Publisher { get }
+}
+
+class LoginViewModel: LoginProtocolType {
     
     // MARK: - Properties
     private let authService: AuthProtocol
@@ -21,10 +32,12 @@ class LoginViewModel {
     // MARK: - Output
     @Published var isLoading: Bool = false
     @Published var errorMessage: String?
+    var isLoadingPublisher: Published<Bool>.Publisher { $isLoading }
+    
     let loginTrigger = PassthroughSubject<Void, Never>()
     let loginBioTrigger = PassthroughSubject<Void, Never>()
-
-
+    
+    
     private let loginSuccessSubject = PassthroughSubject<Void, Never>()
     var loginSuccessPublisher: AnyPublisher<Void, Never> {
         loginSuccessSubject.eraseToAnyPublisher()
@@ -38,8 +51,6 @@ class LoginViewModel {
             .eraseToAnyPublisher()
     }
     
-    
-    
     init(with authService: AuthProtocol) {
         self.authService = authService
         
@@ -50,13 +61,13 @@ class LoginViewModel {
             .store(in: &cancellables)
         
         loginTrigger
-              .sink { [weak self] in
-                  self?.login()
-              }
-              .store(in: &cancellables)
+            .sink { [weak self] in
+                self?.login()
+            }
+            .store(in: &cancellables)
     }
     
-
+    
     func login() {
         isLoading = true
         errorMessage = nil

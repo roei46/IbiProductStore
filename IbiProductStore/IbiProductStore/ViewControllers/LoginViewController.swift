@@ -13,11 +13,11 @@ class LoginViewController: UIViewController {
     @IBOutlet weak var loginButton: UIButton!
     @IBOutlet weak var biometricButton: UIButton!
     
-    private var viewModel: LoginViewModel
+    private var viewModel: any LoginProtocolType
     private var cancellables = Set<AnyCancellable>()
     
     
-    init(viewModel: LoginViewModel) {
+    init(viewModel: any LoginProtocolType) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
         
@@ -45,14 +45,16 @@ class LoginViewController: UIViewController {
         
         viewModel.isLoginButtonEnabled
             .receive(on: DispatchQueue.main)
-            .assign(to: \.isEnabled, on: loginButton)
+            .sink { [weak self] isEnabled in
+                self?.loginButton.isEnabled = isEnabled
+            }
             .store(in: &cancellables)
         
         loginButton.tapPublisher
             .subscribe(viewModel.loginTrigger)
             .store(in: &cancellables)
         loginButton
-            .bindLoading(to: viewModel.$isLoading, animationName: "loader", cancellables: &cancellables)
+            .bindLoading(to: viewModel.isLoadingPublisher, animationName: "loader", cancellables: &cancellables)
         
         biometricButton.tapPublisher
             .subscribe(viewModel.loginBioTrigger)
