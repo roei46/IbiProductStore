@@ -106,8 +106,6 @@ extension CDProduct {
             )
         } ?? []
         
-        // Note: Decryption will be handled by CoreDataStorageService
-        // This method assumes decryption already happened
         var product = Product(
             id: Int(self.id),
             title: self.title ?? "",
