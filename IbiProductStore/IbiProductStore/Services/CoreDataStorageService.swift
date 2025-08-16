@@ -13,34 +13,28 @@ final class CoreDataStorageService: LocalStorageServiceProtocol {
     
     // MARK: - Properties
     private let coreDataStack: CoreDataStack
-    private let encryptionKey = SymmetricKey(size: .bits256)
+    private let encryptionKey: SymmetricKey
     
     // MARK: - Initialization
     init(coreDataStack: CoreDataStack) {
         self.coreDataStack = coreDataStack
+        self.encryptionKey = Self.getOrCreateEncryptionKey()
+    }
+    
+    // MARK: - Encryption Key Management
+    private static func getOrCreateEncryptionKey() -> SymmetricKey {
+        let keyKey = "CoreDataEncryptionKey"
+        
+        if let existingKeyData = UserDefaults.standard.data(forKey: keyKey) {
+            return SymmetricKey(data: existingKeyData)
+        } else {
+            let newKey = SymmetricKey(size: .bits256)
+            UserDefaults.standard.set(newKey.withUnsafeBytes { Data($0) }, forKey: keyKey)
+            return newKey
+        }
     }
     
     // MARK: - Favorites Management
-    func saveFavorites(_ products: [Product]) {
-        // Core Data approach: Update existing products or create new ones
-        let context = coreDataStack.context
-        
-        do {
-            for product in products {
-                if let existingProduct = try CDProduct.findByID(product.id, context: context) {
-                    existingProduct.isFavorite = true
-                } else {
-                    let cdProduct = product.toCoreData(context: context)
-                    encryptSensitiveFields(cdProduct, from: product)
-                    cdProduct.isFavorite = true
-                }
-            }
-            
-            coreDataStack.save()
-        } catch {
-            print("Error saving favorites: \(error)")
-        }
-    }
     
     func loadFavorites() -> [Product] {
         let context = coreDataStack.context
@@ -175,7 +169,10 @@ final class CoreDataStorageService: LocalStorageServiceProtocol {
             // Reset all local flags instead of deleting everything
             let request: NSFetchRequest<CDProduct> = CDProduct.fetchRequest()
             let allProducts = try context.fetch(request)
-            
+            // TODO: - WHY ONE BY ONE?
+            // TODO: - NEED EVERY THING HER?
+            // TODO: - Make not singltone
+
             for product in allProducts {
                 if product.isLocallyAdded {
                     // Delete locally added products completely
@@ -243,7 +240,7 @@ final class CoreDataStorageService: LocalStorageServiceProtocol {
     
     // MARK: - Helper Methods
     private func updateCDProduct(_ cdProduct: CDProduct, with product: Product) {
-        // Update all properties
+        // Update all properties - comprehensive to ensure Core Data sync
         cdProduct.title = product.title
         cdProduct.descriptionText = product.description
         cdProduct.category = product.category
@@ -373,13 +370,6 @@ final class CoreDataStorageService: LocalStorageServiceProtocol {
                 product = newProduct
             } catch {
                 print("Decryption failed: \(error)")
-                // Clear corrupted encryption data so future saves work properly
-                cdProduct.encryptedIDCipher = nil
-                cdProduct.encryptedIDNonce = nil
-                cdProduct.encryptedSKUCipher = nil
-                cdProduct.encryptedSKUNonce = nil
-                // Save the cleared encryption state
-                try? coreDataStack.context.save()
                 // Return product with plain values (already loaded)
             }
         }

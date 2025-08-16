@@ -110,9 +110,7 @@ class FavoritesViewModel: ProductListProtocol {
     // MARK: - CRUD Operations (Not supported for favorites)
     func canEdit() -> Bool { return false }
     
-    func addProduct() {
-        // Not used in favorites
-    }
+    func addProduct() {}
     
     // MARK: - Private Methods
     private func createCellViewModels(from products: [Product]) {

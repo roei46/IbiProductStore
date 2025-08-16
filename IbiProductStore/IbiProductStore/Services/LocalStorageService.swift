@@ -9,7 +9,6 @@ import Foundation
 import CryptoKit
 
 protocol LocalStorageServiceProtocol {
-    func saveFavorites(_ products: [Product])
     func loadFavorites() -> [Product]
     func saveModifiedProducts(_ products: [Product])
     func loadModifiedProducts() -> [Product]
