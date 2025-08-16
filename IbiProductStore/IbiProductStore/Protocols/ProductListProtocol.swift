@@ -37,7 +37,6 @@ protocol ProductListProtocol: ObservableObject {
     func refreshData()
     func refreshOnAppear()
     func navigateToDetail(at index: Int) 
-    func addProduct()
     
     // MARK: - Favorites Management
     func toggleFavorite(at index: Int)
@@ -45,7 +44,6 @@ protocol ProductListProtocol: ObservableObject {
     
     // MARK: - CRUD Operations
     func canEdit() -> Bool
-    func deleteProduct(at index: Int)
 }
 
 // MARK: - Default Implementations

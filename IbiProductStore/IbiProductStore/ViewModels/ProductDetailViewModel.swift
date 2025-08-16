@@ -57,7 +57,7 @@ class ProductDetailViewModel: DetailsProtocol, ObservableObject {
     let closeTrigger = PassthroughSubject<Void, Never>()
     
     // MARK: - Initialization
-    init(mode: DetailMode, localStorageService: LocalStorageServiceProtocol = CoreDataStorageService.shared) {
+    init(mode: DetailMode, localStorageService: LocalStorageServiceProtocol) {
         self.mode = mode
         self.localStorageService = localStorageService
         

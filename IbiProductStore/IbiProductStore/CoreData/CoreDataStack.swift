@@ -11,9 +11,6 @@ import CryptoKit
 
 final class CoreDataStack {
     
-    // MARK: - Singleton
-    static let shared = CoreDataStack()
-    
     // MARK: - Core Data Stack
     lazy var persistentContainer: NSPersistentContainer = {
         let container = NSPersistentContainer(name: "IbiProductStore")
@@ -90,7 +87,7 @@ final class CoreDataStack {
     }
     
     // MARK: - Initialization
-    private init() {
+    init() {
         // Encryption now handled directly in CoreDataStorageService
     }
     

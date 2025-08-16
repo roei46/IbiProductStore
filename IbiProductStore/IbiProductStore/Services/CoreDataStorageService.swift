@@ -12,12 +12,11 @@ import CryptoKit
 final class CoreDataStorageService: LocalStorageServiceProtocol {
     
     // MARK: - Properties
-    static let shared = CoreDataStorageService()
     private let coreDataStack: CoreDataStack
     private let encryptionKey = SymmetricKey(size: .bits256)
     
     // MARK: - Initialization
-    private init(coreDataStack: CoreDataStack = .shared) {
+    init(coreDataStack: CoreDataStack) {
         self.coreDataStack = coreDataStack
     }
     

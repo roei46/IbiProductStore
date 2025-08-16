@@ -12,6 +12,8 @@ import Combine
 class MainTabCoordinator: Coordinator {
     var childCoordinators = [Coordinator]()
     var navigationController: UINavigationController
+    private var coreDataStack: CoreDataStack
+    private var storageService: LocalStorageServiceProtocol
     
     private let logoutSubject = PassthroughSubject<Void, Never>()
     var logoutPublisher: AnyPublisher<Void, Never> {
@@ -20,6 +22,8 @@ class MainTabCoordinator: Coordinator {
     
     init(navigationController: UINavigationController) {
         self.navigationController = navigationController
+        self.coreDataStack = CoreDataStack()
+        self.storageService = CoreDataStorageService(coreDataStack: coreDataStack)
     }
     
     func start() {
@@ -27,7 +31,7 @@ class MainTabCoordinator: Coordinator {
         
         // Products Tab
         let productsNav = UINavigationController()
-        let productsCoordinator = ProductsCoordinator(navigationController: productsNav)
+        let productsCoordinator = ProductsCoordinator(navigationController: productsNav, storageService: storageService)
         childCoordinators.append(productsCoordinator)
         productsCoordinator.start()
         productsNav.tabBarItem = UITabBarItem(
@@ -38,7 +42,7 @@ class MainTabCoordinator: Coordinator {
 
         // Favorites Tab
         let favoritesNav = UINavigationController()
-        let favoritesCoordinator = FavoritesCoordinator(navigationController: favoritesNav)
+        let favoritesCoordinator = FavoritesCoordinator(navigationController: favoritesNav, storageService: storageService)
         childCoordinators.append(favoritesCoordinator)
         favoritesCoordinator.start()
         favoritesNav.tabBarItem = UITabBarItem(

@@ -50,7 +50,7 @@ class FavoritesViewModel: ProductListProtocol {
     var screenSubTitlePublisher: Published<String>.Publisher { $subTitle }
 
     // MARK: - Initialization
-    init(localStorageService: LocalStorageServiceProtocol = CoreDataStorageService.shared) {
+    init(localStorageService: LocalStorageServiceProtocol) {
         self.localStorageService = localStorageService
         setupBindings()
         loadProducts()

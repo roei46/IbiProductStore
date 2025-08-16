@@ -13,13 +13,15 @@ class ProductsCoordinator: Coordinator {
     var childCoordinators = [Coordinator]()
     var navigationController: UINavigationController
     private var cancellables = Set<AnyCancellable>()
+    private var storageService: LocalStorageServiceProtocol
     
-    init(navigationController: UINavigationController) {
+    init(navigationController: UINavigationController, storageService: LocalStorageServiceProtocol) {
         self.navigationController = navigationController
+        self.storageService = storageService
     }
     
     func start() {
-        let productsViewModel = ProductsViewModel()
+        let productsViewModel = ProductsViewModel(localStorageService: storageService)
         let productsViewController = TableViewWithTitleViewController(viewModel: productsViewModel)
                 
         // Subscribe to product selection (edit mode)
@@ -69,5 +71,18 @@ class ProductsCoordinator: Coordinator {
         })
         
         navigationController.present(alert, animated: true)
+    }
+    
+    private func showProductDetail(mode: DetailMode, cancellables: inout Set<AnyCancellable>) {
+        let detailViewModel = ProductDetailViewModel(mode: mode, localStorageService: storageService)
+        let detailViewController = DetailsViewController(viewModel: detailViewModel)
+
+        detailViewModel.closeTrigger
+            .sink { [weak self] _ in
+                self?.navigationController.popViewController(animated: true)
+            }
+            .store(in: &cancellables)
+        
+        navigationController.pushViewController(detailViewController, animated: true)
     }
 }

@@ -13,13 +13,15 @@ class FavoritesCoordinator: Coordinator {
     var childCoordinators = [Coordinator]()
     var navigationController: UINavigationController
     private var cancellables = Set<AnyCancellable>()
+    private let storageService: LocalStorageServiceProtocol
     
-    init(navigationController: UINavigationController) {
+    init(navigationController: UINavigationController, storageService: LocalStorageServiceProtocol) {
         self.navigationController = navigationController
+        self.storageService = storageService
     }
     
     func start() {
-        let favoritesViewModel = FavoritesViewModel()
+        let favoritesViewModel = FavoritesViewModel(localStorageService: storageService)
         let favoritesViewController = TableViewWithTitleViewController(viewModel: favoritesViewModel)
 
         // Subscribe to product selection
@@ -31,5 +33,18 @@ class FavoritesCoordinator: Coordinator {
             .store(in: &cancellables)
         
         navigationController.pushViewController(favoritesViewController, animated: false)
+    }
+    
+    private func showProductDetail(mode: DetailMode, cancellables: inout Set<AnyCancellable>) {
+        let detailViewModel = ProductDetailViewModel(mode: mode, localStorageService: storageService)
+        let detailViewController = DetailsViewController(viewModel: detailViewModel)
+
+        detailViewModel.closeTrigger
+            .sink { [weak self] _ in
+                self?.navigationController.popViewController(animated: true)
+            }
+            .store(in: &cancellables)
+        
+        navigationController.pushViewController(detailViewController, animated: true)
     }
 }

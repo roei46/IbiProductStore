@@ -61,7 +61,7 @@ class ProductsViewModel: ProductListProtocol {
 
     
     // MARK: - Initialization
-    init(productService: ProductService = .init(), localStorageService: LocalStorageServiceProtocol = CoreDataStorageService.shared) {
+    init(productService: ProductService = .init(), localStorageService: LocalStorageServiceProtocol) {
         self.networkService = productService
         self.localStorageService = localStorageService
         setupBindings()
