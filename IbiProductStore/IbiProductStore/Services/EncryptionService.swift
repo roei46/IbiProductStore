@@ -2,7 +2,7 @@
 //  EncryptionService.swift
 //  IbiProductStore
 //
-//  Created by Claude Code on 16/08/2025.
+//  Created by Roei Baruch on 16/08/2025.
 //
 
 import Foundation
